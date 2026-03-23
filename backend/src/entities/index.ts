@@ -1,0 +1,63 @@
+
+import { BillingPeriodsEntity } from 'src/billing_periods/billing_periods.entity';
+import { BillingRecordsEntity } from 'src/billing_records/billing_records.entity';
+import { BillingSetTypesEntity } from 'src/billing_set_types/billing_set_types.entity';
+import { BillingTypesEntity } from 'src/billing_types/billing_types.entity';
+import { CategoriesEntity } from 'src/categories/categories.entity';
+import { InsightsEntity } from 'src/insights/insights.entity';
+import { NotificationsEntity } from 'src/notifications/notifications.entity';
+import { NotificationsRecipientsEntity } from 'src/notifications_recipients/notifications_recipients.entity';
+import { QualificationsEntity } from 'src/qualifications/qualifications.entity';
+import { ScholarshipsEntity } from 'src/scholarships/scholarships.entity';
+import { TraineesEntity } from 'src/trainees/trainees.entity';
+import { TrainingCentersEntity } from 'src/training_centers/training_centers.entity';
+import { TrainingCentersTypeEntity } from 'src/training_centers_type/training_centers_type.entity';
+import { UserEntity } from 'src/user/user.entity';
+import { UserMenuEntity } from 'src/user_menu/user_menu.entity';
+import { UserProfileEntity } from 'src/user_profile/user_profile.entity';
+import { UserTypeMenuEntity } from 'src/user_type_menu/user_type_menu.entity';
+import { UserTypesEntity } from 'src/user_types/user_types.entity';
+
+const entities = [
+    UserEntity,
+    UserTypesEntity,
+    UserMenuEntity,
+    UserTypeMenuEntity,
+    UserProfileEntity,
+    TrainingCentersEntity,
+    ScholarshipsEntity,
+    QualificationsEntity,
+    TrainingCentersTypeEntity,
+    BillingRecordsEntity,
+    BillingTypesEntity,
+    CategoriesEntity,
+    BillingSetTypesEntity,
+    BillingPeriodsEntity,
+    TraineesEntity,
+    InsightsEntity,
+    NotificationsEntity,
+    NotificationsRecipientsEntity
+];
+
+export {
+    UserEntity,
+    UserTypesEntity,
+    UserMenuEntity,
+    UserTypeMenuEntity,
+    UserProfileEntity,
+    TrainingCentersEntity,
+    ScholarshipsEntity,
+    QualificationsEntity,
+    TrainingCentersTypeEntity,
+    BillingRecordsEntity,
+    BillingTypesEntity,
+    CategoriesEntity,
+    BillingSetTypesEntity,
+    BillingPeriodsEntity,
+    TraineesEntity,
+    InsightsEntity,
+    NotificationsEntity,
+    NotificationsRecipientsEntity
+};
+
+export default entities;

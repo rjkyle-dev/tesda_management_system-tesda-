@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 130px 30px 90px; /* space for header & footer */
+            text-align: center;
+        }
+
+        /* ===================== HEADER ======================= */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 110px;
+            border-bottom: 1px solid #ccc;
+            text-align: left;
+            padding: 10px 20px;
+        }
+
+        header img {
+            height: 80px;
+        }
+
+        /* ===================== FOOTER ======================= */
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            border-top: 1px solid #ccc;
+            text-align: center;
+            padding-top: 5px;
+            font-size: 12px;
+        }
+
+        footer img {
+            height: 40px;
+        }
+
+        /* ===================== CONTENT ======================= */
+        h1 {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+        h2 {
+            font-size: 20px;
+            margin-top: 5px;
+        }
+        table {
+            margin: 20px auto;
+            width: 90%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===================== HEADER (Base64 Image) ======================= -->
+<header>
+    <img src="data:image/png;base64,{{headerImageBase64}}" alt="Header Logo">
+</header>
+
+<!-- ===================== FOOTER (Base64 Image + Text) ======================= -->
+<footer>
+    <div>
+        <img src="data:image/png;base64,{{footerImageBase64}}" alt="Footer Logo">
+    </div>
+    <div>{{footerText}} — Page {{pageNumber}} of {{totalPages}}</div>
+</footer>
+
+<!-- ===================== MAIN CONTENT ======================= -->
+
+<h1>{{title_report}}</h1>
+<h2>{{title}}</h2>
+
+{{#if type}}
+    {{#eq type 'billing_report'}}
+    <table>
+        <thead>
+            <tr>
+                {{#if hasTC}}
+                    <th>Training Center</th>
+                {{/if}}
+                <th>RQM CODE</th>
+                <th>Scholarship Type</th>
+                <th>Training Program</th>
+                <th>Billing Type</th>
+                <th>Submission Date</th>
+                <th>Status</th>
+                <th>Total Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each billingReportData}}
+                <tr>
+                    {{#if ../hasTC}}
+                        <td>{{trainingCenter}}</td>
+                    {{/if}}
+                    <td>{{pqmCode}}</td>
+                    <td>{{scholarshipType}}</td>
+                    <td>{{trainingProgram}}</td>
+                    <td>{{billingType}}</td>
+                    <td>{{submissionDate}}</td>
+                    <td>{{status}}</td>
+                    <td>{{peso totalAmount}}</td>
+                </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    {{/eq}}
+
+    {{#eq type 'utilization_report'}}
+    <table>
+        <thead>
+            <tr>
+                {{#if hasTC}}
+                    <th>Training Center</th>
+                    <th>Allocated Budget</th>
+                    <th>Utilized Budget</th>
+                    <th>Utilization Rate (%)</th>
+                {{else}}
+                    <th>RQM Code</th>
+                    <th>Scholarship</th>
+                    <th>Allocated Budget</th>
+                    <th>Utilized Budget</th>
+                    <th>Utilization Rate (%)</th>
+                {{/if}}
+                
+            </tr> 
+        </thead>
+        <tbody>
+            {{#each billingReportData}}
+                <tr>
+                    {{#if ../hasTC}}
+                        <td>{{trainingCenter}}</td>
+                        <td>{{peso allocatedBudget}}</td>
+                        <td>{{peso utilizedBudget}}</td>
+                        <td>{{utilizationRate}}</td>
+                    {{else}}
+                        <td>{{ctrlNum}}</td>
+                        <td>{{scholarshipProgram}}</td>
+                        <td>{{peso allocatedBudget}}</td>
+                        <td>{{peso utilizedBudget}}</td>
+                        <td>{{utilizationRate}}</td> 
+                    {{/if}}
+                    
+                </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    {{/eq}}
+
+    {{#eq type 'compliance_report'}}
+    <table>
+        <thead>
+            <tr>
+                {{#if hasTC}}
+                    <th>Training Center</th>
+                    <th>Number of Billable Submissions</th>
+                    <th>On-Time/Correct Submissions</th>
+                    <th>Compliance Rate</th>
+                {{else}}
+                    <th>RQM Code</th>
+                    <th>Scholarship</th>
+                    <th>Number of Billable Submissions</th>
+                    <th>On-Time/Correct Submissions</th>
+                    <th>Compliance Rate</th>
+                {{/if}}
+                
+            </tr>
+        </thead>
+        <tbody>
+            {{#each billingReportData}}
+                <tr>
+                    {{#if ../hasTC}}
+                        <td>{{trainingCenter}}</td>
+                        <td>{{totalSubmissions}}</td>
+                        <td>{{onTimeSubmissions}}</td>
+                        <td>{{complianceRate}}%</td>
+                    {{else}}
+                        <td>{{ctrlNum}}</td>
+                        <td>{{scholarshipProgram}}</td>
+                        <td>{{totalSubmissions}}</td>
+                        <td>{{onTimeSubmissions}}</td>
+                        <td>{{complianceRate}}%</td>
+                    {{/if}}
+                   
+                </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    {{/eq}}
+
+    {{#eq type 'assessment_report'}}
+    <table>
+        <thead>
+            <tr>
+                {{#if hasTC}}
+                    <th>Training Center</th>
+                {{/if}}
+                <th>RQM Code</th>
+                <th>Qualification</th>
+                <th>Competent</th>
+                <th>Rate (%)</th>
+                <th>NYC</th>
+                <th>Rate (%)</th>
+                <th>Absent</th>
+                <th>Rate (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each billingReportData}}
+                <tr>
+                    {{#if ../hasTC}}
+                        <td>{{trainingCenter}}</td>
+                    {{/if}}
+                    <td>{{ctrlNum}}</td>
+                    <td>{{qualification}}</td>
+                    <td>{{competent}}</td>
+                    <td>{{rateCompetent}}</td>
+                    <td>{{nyc}}</td>
+                    <td>{{rateNyc}}</td>
+                    <td>{{absent}}</td>
+                    <td>{{rateAbsent}}</td>
+                </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    {{/eq}}
+
+    {{#eq type 'dropped_report'}}
+    <table>
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>Name</th>
+                {{#if hasTC}}
+                    <th>Training Center</th>
+                {{/if}}
+                <th>RQM Code</th>
+                <th>Qualification</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each billingReportData}}
+                <tr>
+                    <td>{{no}}</td>
+                    <td>{{name}}</td>
+                    {{#if ../hasTC}}
+                        <td>{{trainingCenter}}</td>
+                    {{/if}}
+                    <td>{{pqmCode}}</td>
+                    <td>{{qualification}}</td>
+                </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    {{/eq}}
+
+    {{#eq type 'performance_report'}}
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Training Center</th>
+                <th>Budget Utilization Rate (BUR)</th>
+                <th>Billing Submission Compliance (BSC)</th>
+                <th>WPS</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each billingReportData}}
+                <tr>
+                    <td>{{rank}}</td>
+                    <td>{{trainingCenter}}</td>
+                    <td>{{BUR}}%</td>
+                    <td>{{BSC}}%</td>
+                    <td>{{WPS}}</td>
+                </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    {{/eq}}
+
+    {{#eq type 'scholarship_report'}}
+    <table>
+        <thead>
+            <tr>
+                <th>Scholarship Type</th>
+                <th>Allocated Budget (PHP)</th>
+                <th>Utilized Budget (PHP)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each billingReportData}}
+                <tr>
+                    <td>{{scholarshipType}}</td>
+                    <td>{{peso allocatedBudget}}</td>
+                    <td>{{peso utilizedBudget}}</td>
+                </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    {{/eq}}
+
+{{/if}}
+
+</body>
+</html>
