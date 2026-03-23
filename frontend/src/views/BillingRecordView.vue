@@ -187,7 +187,7 @@ export default{
             statusTabs: [
             { key: 'pending', label: 'PENDING' },
             { key: 'approved', label: 'APPROVED' },
-            { key: 'denied', label: 'REVISION' },
+            { key: 'denied', label: 'FOR REVISION' },
             { key: 'completed', label: 'FINISHED' }
             ],
             isWorkback : null,

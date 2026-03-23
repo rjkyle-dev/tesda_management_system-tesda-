@@ -1555,7 +1555,7 @@
                     return 'bg-red-100 text-red-800';
                 case 'Denied':
                     return 'bg-red-100 text-red-800';
-                case 'Revised':
+                case 'For Revision':
                     return 'bg-orange-100 text-orange-800';
                 default:
                     return 'bg-gray-100 text-gray-600';
@@ -1600,7 +1600,7 @@
                 case 2:
                     return 'Denied';
                 case 3:
-                    return 'Revised';
+                    return 'For Revision';
                 default:
                     return 'No action yet';
                 }
@@ -1612,7 +1612,7 @@
                 case 2:
                     return 'Denied';
                 case 3:
-                    return 'Revised';
+                    return 'For Revision';
                 default:
                     return 'Pending';
                 }
