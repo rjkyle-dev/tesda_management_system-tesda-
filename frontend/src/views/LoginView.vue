@@ -27,7 +27,7 @@
                     An Online Scholarship Management System with Descriptive Analytics for TESDA Davao de Oro
                 </p>
 
-                <ul class="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start" role="list">
+                <!-- <ul class="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start" role="list">
                     <li class="login-pill">
                         <svg class="h-4 w-4 text-cyan-300/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path d="M12 14l9-5-9-5-9 5 9 5z" />
@@ -47,7 +47,7 @@
                         </svg>
                         Descriptive Analytics Dashboard & Reporting
                     </li>
-                </ul>
+                </ul> -->
             </section>
 
             <!-- Floating login card -->
