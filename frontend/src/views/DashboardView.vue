@@ -20,7 +20,7 @@
 <div class="flex items-center bg-green-800 text-white rounded-lg p-5 gap-4 animate__slideInUp dashboard-summary-card dashboard-summary-approved">
   <img src="../assets/icon_peso.png" class="flex-none h-8 w-8 dashboard-summary-icon"/>
   <div class="flex-auto flex flex-col">
-    <p class="text-sm dashboard-summary-label">Approved Budget</p>
+    <p class="text-sm dashboard-summary-label">Jerson</p>
     <b class="text-2xl font-thin dashboard-summary-metric">{{ data_statistics ? formatPeso(data_statistics.total_payment) : '-' }}</b>
   </div>
 </div>
