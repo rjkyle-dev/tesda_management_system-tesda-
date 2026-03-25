@@ -11,11 +11,18 @@ export class InsightsService {
         private dataSource: DataSource
     ) { }
 
-    async getAll(){
-
-        return await this.i_repository.createQueryBuilder("insights")
-        .orderBy('insights.datetime_added', 'DESC')
-        .getMany();
+    async getAll() {
+        // Plain SQL avoids TypeORM entity hydration issues (e.g. DECIMAL/TEXT vs default column mapping).
+        const rows = await this.dataSource.query(
+            'SELECT id, from_score, to_score, description, report_name FROM insights ORDER BY id ASC',
+        );
+        return rows.map((row: Record<string, unknown>) => ({
+            id: Number(row.id),
+            from_score: row.from_score != null ? Number(row.from_score) : 0,
+            to_score: row.to_score != null ? Number(row.to_score) : 0,
+            description: row.description ?? '',
+            report_name: row.report_name ?? '',
+        }));
     }
 
     async getCount(){

@@ -1,88 +1,130 @@
 <template>
-  <div class="flex flex-col p-5 gap-4 h-full dashboard-page">
+  <div class="flex flex-col gap-5 p-5 md:p-6 h-full dashboard-page">
 
-      <div class="flex items-center gap-2 dashboard-toolbar">
-          <select v-model="training_center_id" @change="getStats" class="rounded-lg text-gray-800 dashboard-select" :disabled="$store.state.user.ut_id.description == 'TC Staff'">
-              <option v-for="i in alltraining_center" :key="i.id" :value="i.id">
-                  {{  i.description }}
-              </option>
-          </select>
-
-          <select v-model="selectedYear" @change="getStats" class="rounded-lg text-gray-800 dashboard-select">
-              <option v-for="year in years" :key="year" :value="year">
-                  {{ year }}
-              </option>
-          </select>
+    <header class="dashboard-hero-card">
+      <div class="dashboard-hero-left min-w-0 flex-1">
+        <p class="dashboard-hero-kicker">Training center</p>
+        <h1 class="dashboard-hero-title">{{ selectedTrainingCenterName }}</h1>
+        <select
+          v-if="canPickTrainingCenter"
+          v-model="training_center_id"
+          @change="getStats"
+          class="dashboard-hero-select"
+          aria-label="Training center"
+        >
+          <option v-for="i in alltraining_center" :key="i.id" :value="i.id">
+            {{ i.description }}
+          </option>
+        </select>
       </div>
-    
-     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 dashboard-summary-grid">
-<!-- Approved Budget -->
-<div class="flex items-center bg-green-800 text-white rounded-lg p-5 gap-4 animate__slideInUp dashboard-summary-card dashboard-summary-approved">
-  <img src="../assets/icon_peso.png" class="flex-none h-8 w-8 dashboard-summary-icon"/>
-  <div class="flex-auto flex flex-col">
-    <p class="text-sm dashboard-summary-label">Approved Budget</p>
-    <b class="text-2xl font-thin dashboard-summary-metric">{{ data_statistics ? formatPeso(data_statistics.total_payment) : '-' }}</b>
-  </div>
-</div>
-
-<!-- Utilized Budget -->
-<div class="flex items-center bg-green-700 text-white rounded-lg p-5 gap-4 animate__slideInUp dashboard-summary-card dashboard-summary-utilized">
-  <img src="../assets/icon_peso.png" class="flex-none h-8 w-8 dashboard-summary-icon"/>
-  <div class="flex-auto flex flex-col">
-    <p class="text-sm dashboard-summary-label">Utilized Budget</p>
-    <b class="text-2xl font-thin dashboard-summary-metric">{{ data_statistics ? formatPeso(data_statistics.total_utilized) : '-' }}</b>
-  </div>
-</div>
-
-<!-- Unutilized Budget -->
-<div class="flex items-center bg-red-600 text-white rounded-lg p-5 gap-4 animate__slideInUp dashboard-summary-card dashboard-summary-unutilized">
-  <img src="../assets/icon_peso.png" class="flex-none h-8 w-8 dashboard-summary-icon"/>
-  <div class="flex-auto flex flex-col"> 
-    <p class="text-sm dashboard-summary-label">Unutilized Budget</p>
-    <b class="text-2xl font-thin dashboard-summary-metric">{{ data_statistics ? formatPeso(data_statistics.total_unutilized) : '-' }}</b>
-  </div>
-</div>
-
-<!-- Trainings Implemented -->
-<div class="flex items-center bg-blue-700 text-white rounded-lg p-5 gap-4 animate__slideInUp dashboard-summary-card dashboard-summary-trainings">
-  <img src="../assets/icon_bill.png" class="flex-none h-8 w-8 dashboard-summary-icon"/>
-  <div class="flex-auto flex flex-col">
-    <p class="text-sm dashboard-summary-label">Trainings Implemented</p>
-    <b class="text-2xl font-thin dashboard-summary-metric">{{ data_statistics ? data_statistics.total_implemented : '-' }}</b>
-  </div>
-</div>
-
-<!-- Bills Submitted -->
-<div class="flex items-center bg-orange-700 text-white rounded-lg p-5 gap-4 animate__slideInUp dashboard-summary-card dashboard-summary-bills">
-  <img src="../assets/icon_bill.png" class="flex-none h-8 w-8 dashboard-summary-icon"/>
-  <div class="flex-auto flex flex-col">
-    <p class="text-sm dashboard-summary-label">Bills Submitted</p>
-    <b class="text-2xl font-thin dashboard-summary-metric">{{ data_statistics ? data_statistics.total_submitted : '-' }}</b>
-  </div>
-</div>
-
-<!-- Pending Bills -->
-<div class="flex items-center bg-orange-700 text-white rounded-lg p-5 gap-4 animate__slideInUp dashboard-summary-card dashboard-summary-pending">
-  <img src="../assets/icon_bill.png" class="flex-none h-8 w-8 dashboard-summary-icon"/>
-  <div class="flex-auto flex flex-col">
-    <p class="text-sm dashboard-summary-label">Pending Bills</p>
-    <b class="text-2xl font-thin dashboard-summary-metric">{{ data_statistics ? data_statistics.total_pending : '-' }}</b>
-  </div>
-</div>
-</div>
-
-       <!--Calendar-->
-      <!-- <div class="flex-none grid grid-cols-1 sm:grid-cols-2 gap-4 sm:hidden"> -->
-      <div>
-
-          <div>
-              <FullCalendar :options="calendarOptions" class="bg-white p-4 h-auto max-h-96 rounded-md animate__slideInUp dashboard-panel dashboard-calendar"/>
-          </div>
-
-          
-
+      <div class="dashboard-hero-right shrink-0">
+        <label class="sr-only" for="dashboard-fiscal-year">Fiscal year</label>
+        <select
+          id="dashboard-fiscal-year"
+          v-model="selectedYear"
+          @change="getStats"
+          class="dashboard-year-badge"
+        >
+          <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
+        </select>
       </div>
-       <!--Calendar-->
+    </header>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4 dashboard-budget-row">
+      <div class="dashboard-budget-card dashboard-budget-approved animate__slideInUp">
+        <div class="dashboard-budget-icon-wrap" aria-hidden="true">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="dashboard-budget-body">
+          <p class="dashboard-budget-label">Approved Budget</p>
+          <p class="dashboard-budget-value">{{ data_statistics ? formatPeso(data_statistics.total_payment) : '—' }}</p>
+        </div>
+        <span v-if="selectedYear" class="dashboard-budget-pill">{{ selectedYear }}</span>
+      </div>
+
+      <div class="dashboard-budget-card dashboard-budget-utilized animate__slideInUp">
+        <div class="dashboard-budget-icon-wrap" aria-hidden="true">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+        </div>
+        <div class="dashboard-budget-body">
+          <p class="dashboard-budget-label">Utilized Budget</p>
+          <p class="dashboard-budget-value">{{ data_statistics ? formatPeso(data_statistics.total_utilized) : '—' }}</p>
+        </div>
+        <span v-if="budgetUtilizationPercent != null" class="dashboard-budget-pill">{{ budgetUtilizationPercent }}%</span>
+      </div>
+
+      <div class="dashboard-budget-card dashboard-budget-unutilized animate__slideInUp">
+        <div class="dashboard-budget-icon-wrap" aria-hidden="true">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+          </svg>
+        </div>
+        <div class="dashboard-budget-body">
+          <p class="dashboard-budget-label">Unutilized Budget</p>
+          <p class="dashboard-budget-value">{{ data_statistics ? formatPeso(data_statistics.total_unutilized) : '—' }}</p>
+        </div>
+        <span v-if="budgetUnutilizedPercent != null" class="dashboard-budget-pill">{{ budgetUnutilizedPercent }}%</span>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 dashboard-metric-row">
+      <div class="dashboard-metric-card animate__slideInUp">
+        <div class="dashboard-metric-icon dashboard-metric-icon-blue" aria-hidden="true">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+        </div>
+        <div>
+          <p class="dashboard-metric-label">Trainings Implemented</p>
+          <p class="dashboard-metric-value">{{ data_statistics ? data_statistics.total_implemented : '—' }}</p>
+        </div>
+      </div>
+      <div class="dashboard-metric-card animate__slideInUp">
+        <div class="dashboard-metric-icon dashboard-metric-icon-amber" aria-hidden="true">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <div>
+          <p class="dashboard-metric-label">Bills Submitted</p>
+          <p class="dashboard-metric-value">{{ data_statistics ? data_statistics.total_submitted : '—' }}</p>
+        </div>
+      </div>
+      <div class="dashboard-metric-card animate__slideInUp">
+        <div class="dashboard-metric-icon dashboard-metric-icon-rose" aria-hidden="true">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <p class="dashboard-metric-label">Pending Bills</p>
+          <p class="dashboard-metric-value">{{ data_statistics ? data_statistics.total_pending : '—' }}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard-calendar-shell animate__slideInUp dashboard-panel">
+      <div class="dashboard-calendar-toolbar">
+        <div class="dashboard-calendar-title-wrap">
+          <span class="dashboard-calendar-icon" aria-hidden="true">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </span>
+          <h2 class="dashboard-calendar-heading">{{ calendarTitle || 'Calendar' }}</h2>
+        </div>
+        <div class="dashboard-calendar-nav">
+          <button type="button" class="dashboard-cal-nav-btn" @click="calendarPrev" aria-label="Previous month">‹</button>
+          <button type="button" class="dashboard-cal-today" @click="calendarToday">Today</button>
+          <button type="button" class="dashboard-cal-nav-btn" @click="calendarNext" aria-label="Next month">›</button>
+        </div>
+      </div>
+      <FullCalendar ref="fullCalendarRef" :options="calendarOptions" class="dashboard-calendar-inner" />
+    </section>
 
       <!-- Shared Modal -->
       <div
@@ -355,9 +397,12 @@ export default{
           all_periods: [],
           calendarEvents: [], // fullcalendar uses this
 
+          calendarTitle: '',
+
           calendarOptions: {
           plugins: [dayGridPlugin],
           initialView: 'dayGridMonth',
+          headerToolbar: false,
           weekends: true,
           events: [],
 
@@ -426,6 +471,33 @@ export default{
           
            
       }
+  },
+  computed: {
+    canPickTrainingCenter() {
+      const r = this.$store.state.user?.ut_id?.description;
+      return r === 'Admin' || r === 'PO Staff';
+    },
+    selectedTrainingCenterName() {
+      if (!Array.isArray(this.alltraining_center) || !this.training_center_id) return '—';
+      const tc = this.alltraining_center.find((i) => String(i.id) === String(this.training_center_id));
+      return tc?.description || '—';
+    },
+    budgetUtilizationPercent() {
+      const d = this.data_statistics;
+      if (!d || d.total_payment == null || d.total_utilized == null) return null;
+      const pay = Number(d.total_payment);
+      if (!Number.isFinite(pay) || pay <= 0) return null;
+      const ut = Number(d.total_utilized);
+      return Math.round((ut / pay) * 1000) / 10;
+    },
+    budgetUnutilizedPercent() {
+      const d = this.data_statistics;
+      if (!d || d.total_payment == null || d.total_unutilized == null) return null;
+      const pay = Number(d.total_payment);
+      if (!Number.isFinite(pay) || pay <= 0) return null;
+      const un = Number(d.total_unutilized);
+      return Math.round((un / pay) * 1000) / 10;
+    },
   },
   mounted(){
       const currentYear = new Date().getFullYear();
@@ -653,8 +725,21 @@ try {
           };
       },
       onDatesSet(info) {
-      const currentMonth = new Date(info.start).getMonth() + 1; // month is 0-based
-      this.getCalendarBillingPeriods(currentMonth + 1);
+      this.calendarTitle = info.view.title;
+      const month = info.start.getMonth() + 1;
+      this.getCalendarBillingPeriods(month);
+      },
+      calendarApi() {
+        return this.$refs.fullCalendarRef?.getApi?.() ?? null;
+      },
+      calendarPrev() {
+        this.calendarApi()?.prev();
+      },
+      calendarNext() {
+        this.calendarApi()?.next();
+      },
+      calendarToday() {
+        this.calendarApi()?.today();
       },
       onEventClick(info) {
       this.selectedEvent = {
@@ -1540,82 +1625,323 @@ overflow-wrap: break-word;
 line-height: 1.2;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .dashboard-page {
-  background: linear-gradient(180deg, #f8fbff 0%, #f2f5fb 100%);
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
-.dashboard-toolbar {
-  flex-wrap: wrap;
-  padding: 0.85rem 1rem;
-  border-radius: 0.9rem;
-  background: #ffffff;
-  border: 1px solid #e4e9f2;
-  box-shadow: 0 4px 16px rgba(30, 41, 59, 0.06);
+.dashboard-hero-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+  padding: 1.5rem 1.75rem;
+  background: #fff;
+  border-radius: 1rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
 
-.dashboard-select {
-  min-height: 2.35rem;
+@media (min-width: 640px) {
+  .dashboard-hero-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+  }
+}
+
+.dashboard-hero-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dashboard-hero-kicker {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.dashboard-hero-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.dashboard-hero-select {
+  margin-top: 0.5rem;
+  width: fit-content;
+  max-width: min(100%, 28rem);
+  min-height: 2.25rem;
   padding: 0.35rem 0.75rem;
-  border: 1px solid #d5deea;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #374151;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.dashboard-hero-right {
+  align-self: flex-start;
+}
+
+@media (min-width: 640px) {
+  .dashboard-hero-right {
+    align-self: center;
+  }
+}
+
+.dashboard-year-badge {
+  min-height: auto;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: #e5e7eb;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.dashboard-year-badge:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.dashboard-budget-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 118px;
+  padding: 1.25rem 1.35rem;
+  border-radius: 1rem;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.dashboard-budget-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.26);
+}
+
+.dashboard-budget-approved {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 45%, #1e3a8a 100%);
+}
+
+.dashboard-budget-utilized {
+  background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%);
+}
+
+.dashboard-budget-unutilized {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 45%, #b91c1c 100%);
+}
+
+.dashboard-budget-icon-wrap {
+  flex-shrink: 0;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.dashboard-budget-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-budget-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  opacity: 0.95;
+  letter-spacing: 0.02em;
+}
+
+.dashboard-budget-value {
+  margin-top: 0.35rem;
+  font-size: clamp(1.25rem, 3vw, 1.65rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.dashboard-budget-pill {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
+}
+
+.dashboard-metric-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.15rem 1.25rem;
+  border-radius: 1rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 20px rgba(30, 41, 59, 0.07);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.dashboard-metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(30, 41, 59, 0.1);
+}
+
+.dashboard-metric-icon {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-metric-icon-blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.dashboard-metric-icon-amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.dashboard-metric-icon-rose {
+  background: #fef2f2;
+  color: #e11d48;
+}
+
+.dashboard-metric-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.dashboard-metric-value {
+  margin-top: 0.2rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.dashboard-calendar-shell {
+  overflow: hidden;
+  background: #fff;
+}
+
+.dashboard-calendar-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.15rem 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.dashboard-calendar-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.dashboard-calendar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.65rem;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.dashboard-calendar-heading {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.dashboard-calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.dashboard-cal-nav-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #475569;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.dashboard-cal-nav-btn:hover {
   background: #f8fafc;
 }
 
-.dashboard-summary-grid {
-  margin-top: 0.15rem;
-}
-
-.dashboard-summary-card {
-  min-height: 102px;
-  border-radius: 0.9rem;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.dashboard-summary-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.24);
-}
-
-.dashboard-summary-approved {
-  background: linear-gradient(135deg, #0f8d4c 0%, #0d6f3e 100%);
-}
-
-.dashboard-summary-utilized {
-  background: linear-gradient(135deg, #1c9a5c 0%, #147947 100%);
-}
-
-.dashboard-summary-unutilized {
-  background: linear-gradient(135deg, #f03947 0%, #d51b2a 100%);
-}
-
-.dashboard-summary-trainings {
-  background: linear-gradient(135deg, #396eff 0%, #2552d8 100%);
-}
-
-.dashboard-summary-bills {
-  background: linear-gradient(135deg, #de641c 0%, #c04f10 100%);
-}
-
-.dashboard-summary-pending {
-  background: linear-gradient(135deg, #cb4f15 0%, #a9400d 100%);
-}
-
-.dashboard-summary-icon {
-  filter: brightness(0) invert(1);
-}
-
-.dashboard-summary-label {
+.dashboard-cal-today {
+  padding: 0.35rem 0.85rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-size: 0.8rem;
   font-weight: 600;
-  letter-spacing: 0.01em;
-  opacity: 0.95;
+  color: #334155;
+  cursor: pointer;
 }
 
-.dashboard-summary-metric {
-  margin-top: 0.3rem;
-  font-size: 1.5rem;
-  font-weight: 800;
-  line-height: 1.05;
+.dashboard-cal-today:hover {
+  background: #f1f5f9;
+}
+
+.dashboard-calendar-inner {
+  padding: 0.5rem 0.85rem 1rem;
 }
 
 .dashboard-panel {
@@ -1624,7 +1950,24 @@ line-height: 1.2;
   box-shadow: 0 10px 24px rgba(30, 41, 59, 0.08);
 }
 
-.dashboard-calendar {
-  overflow: hidden;
+:deep(.dashboard-calendar-inner .fc) {
+  --fc-border-color: #e2e8f0;
+  --fc-neutral-bg-color: #f8fafc;
+  --fc-today-bg-color: #eff6ff;
+  font-size: 0.85rem;
+}
+
+:deep(.dashboard-calendar-inner .fc .fc-col-header-cell-cushion) {
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+}
+
+:deep(.dashboard-calendar-inner .fc .fc-daygrid-day-number) {
+  font-weight: 600;
+  color: #334155;
+  padding: 0.35rem 0.45rem;
 }
 </style>
