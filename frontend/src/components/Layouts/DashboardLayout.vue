@@ -1,20 +1,14 @@
 <template>
-  <div class="flex min-h-screen bg-slate-100 bodyTemp">
-    <div
-      class="hidden md:flex shrink-0 overflow-hidden transition-[width,opacity] duration-300 ease-out border-r border-slate-800"
-      :class="openSidebar ? 'w-[260px] opacity-100' : 'w-0 opacity-0 border-transparent'"
+  <div class="min-h-screen bg-slate-100 bodyTemp">
+    <aside
+      class="hidden md:flex fixed top-0 left-0 bottom-0 overflow-hidden transition-[width] duration-300 ease-out border-r border-slate-800 bg-slate-900 z-50"
+      :class="openSidebar ? 'w-[260px]' : 'w-[84px]'"
     >
-      <div class="w-[260px] min-h-screen flex flex-col bg-slate-900">
-        <DashboardSidebar
-          ref="sidebar"
-          :openSidebar="true"
-          class="flex-1 flex flex-col min-h-0"
-        />
-      </div>
-    </div>
+      <DashboardSidebar ref="sidebar" :openSidebar="openSidebar" class="flex-1 flex flex-col min-h-0" />
+    </aside>
 
-    <div class="flex flex-col flex-1 min-w-0 min-h-screen">
-      <header class="shrink-0 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <div class="flex flex-col min-w-0 min-h-screen transition-[padding] duration-300 ease-out" :class="openSidebar ? 'md:pl-[260px]' : 'md:pl-[84px]'">
+      <header class="shrink-0 sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
         <DashboardNavbar />
       </header>
       <main class="flex-1 overflow-y-auto bg-slate-50">

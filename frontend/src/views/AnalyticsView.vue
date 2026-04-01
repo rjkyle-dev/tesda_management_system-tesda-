@@ -228,12 +228,13 @@
           <thead>
             <tr class="bg-gray-50 text-gray-600">
               <th class="px-3 py-2 text-left w-14">Rank</th>
-              <th class="px-3 py-2 text-center w-16">Logo</th>
               <th class="px-3 py-2 text-left">Training Center</th>
-              <th class="px-3 py-2 text-left">Budget Utilization Rate</th>
-              <th class="px-3 py-2 text-left">Billing Submission Compliance</th>
-              <th class="px-3 py-2 text-left">Weighted Performance Score</th>
-              <th class="px-3 py-2 text-left">Status</th>
+              <th class="px-3 py-2 text-center">BUR (%)</th>
+              <th class="px-3 py-2 text-center">Billing Compliance (%)</th>
+              <th class="px-3 py-2 text-center">Enrollment Rate (%)</th>
+              <th class="px-3 py-2 text-center">Completion Rate (%)</th>
+              <th class="px-3 py-2 text-center">Assessment Rate (%)</th>
+              <th class="px-3 py-2 text-center">Weighted Score</th>
             </tr>
           </thead>
           <tbody>
@@ -249,28 +250,19 @@
                   {{ item.rank }}
                 </span>
               </td>
-              <td class="px-3 py-2 text-center">
-                <div
-                  class="tc-logo mx-auto"
-                  :style="{ background: tcLogoGradient(item.id) }"
-                  :title="item.abbre || item.trainingCenter"
-                >
-                  <span class="tc-logo-initials">{{ tcLogoInitials(item) }}</span>
-                </div>
-              </td>
               <td class="px-3 py-2 font-medium text-gray-800">
-                <span class="block">{{ item.trainingCenter }}</span>
-                <span v-if="item.abbre" class="text-xs text-gray-500 font-normal">{{ item.abbre }}</span>
+                <span class="block">{{ item.abbre || item.trainingCenter }}</span>
+                <span v-if="item.abbre && item.trainingCenter" class="text-xs text-gray-500 font-normal">{{ item.trainingCenter }}</span>
               </td>
-              <td class="px-3 py-2 text-gray-700 tabular-nums">{{ formatBurPercent(item.BUR) }}</td>
-              <td class="px-3 py-2 text-gray-700 tabular-nums">{{ formatBscPercent(item.BSC) }}</td>
-              <td class="px-3 py-2 text-gray-800 font-medium tabular-nums">{{ formatWps(item.WPS) }}</td>
-              <td class="px-3 py-2">
-                <span :class="['status-badge', getStatusClass(item)]">{{ getStatus(item) }}</span>
-              </td>
+              <td class="px-3 py-2 text-center text-gray-700 tabular-nums">{{ formatBurPercent(item.BUR) }}</td>
+              <td class="px-3 py-2 text-center text-gray-700 tabular-nums">{{ formatBscPercent(item.BSC) }}</td>
+              <td class="px-3 py-2 text-center text-gray-700 tabular-nums">{{ formatOptionalPercent(item.ENR) }}</td>
+              <td class="px-3 py-2 text-center text-gray-700 tabular-nums">{{ formatOptionalPercent(item.CRR) }}</td>
+              <td class="px-3 py-2 text-center text-gray-700 tabular-nums">{{ formatOptionalPercent(item.ASR) }}</td>
+              <td class="px-3 py-2 text-center text-gray-800 font-medium tabular-nums">{{ formatWps(item.WPS) }}</td>
             </tr>
             <tr v-if="!trainingCenterTableRowsRanked.length">
-              <td colspan="7" class="px-3 py-8 text-center text-gray-500">
+              <td colspan="8" class="px-3 py-8 text-center text-gray-500">
                 <span v-if="!stats.list_tc.length">No performance evaluation data for this fiscal year (same source as Dashboard PE chart).</span>
                 <span v-else>No rows to display.</span>
               </td>
@@ -282,46 +274,141 @@
 
     <div
       v-if="isTrainingCenterModalOpen"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-60"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 backdrop-blur-[2px]"
       @click.self="closeTrainingCenterModal"
     >
-      <div class="w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden">
-        <div class="modal-header px-5 py-4 flex items-start justify-between">
-          <div>
-            <p class="text-xs uppercase tracking-wider text-white text-opacity-85">Training Center Insight</p>
-            <h3 class="text-xl font-semibold text-white">{{ selectedTrainingCenter?.trainingCenter }}</h3>
+      <div class="w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div class="modal-header px-5 py-4 flex items-start justify-between gap-3">
+          <div class="flex items-start gap-4 min-w-0">
+            <div class="relative shrink-0">
+              <div class="tc-logo !w-14 !h-14 !rounded-2xl" :style="{ background: tcLogoGradient(selectedTrainingCenter?.id) }">
+                <span class="tc-logo-initials !text-base">{{ selectedTrainingCenter ? tcLogoInitials(selectedTrainingCenter) : 'TC' }}</span>
+              </div>
+              <div class="absolute -left-2 -bottom-2">
+                <span class="rank-pill rank-pill--gold" v-if="selectedTrainingCenter?.rank === 1">1</span>
+                <span class="rank-pill rank-pill--silver" v-else-if="selectedTrainingCenter?.rank === 2">2</span>
+                <span class="rank-pill rank-pill--bronze" v-else-if="selectedTrainingCenter?.rank === 3">3</span>
+                <span class="rank-pill" v-else>{{ selectedTrainingCenter?.rank ?? '—' }}</span>
+              </div>
+            </div>
+
+            <div class="min-w-0">
+              <p class="text-xs uppercase tracking-wider text-white text-opacity-85">Training Center Analytics</p>
+              <h3 class="text-xl sm:text-2xl font-semibold text-white truncate">
+                {{ selectedTrainingCenter?.trainingCenter || selectedTrainingCenter?.abbre || 'Training Center' }}
+              </h3>
+              <p class="text-xs sm:text-sm text-white/80 mt-1 truncate">
+                Fiscal Year, {{ fiscalYearToYearLabel(selectedFiscalYear) || selectedFiscalYear }}
+              </p>
+            </div>
           </div>
-          <button
-            class="text-white hover:text-gray-200 text-2xl leading-none px-2"
-            @click="closeTrainingCenterModal"
-            aria-label="Close modal"
-          >
+
+          <button class="text-white hover:text-gray-200 text-2xl leading-none px-2" @click="closeTrainingCenterModal" aria-label="Close modal">
             &times;
           </button>
         </div>
 
         <div class="p-5">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-            <div class="modal-stat">
-              <p class="modal-stat-label">Budget Utilization Rate</p>
-              <p class="modal-stat-value tabular-nums">{{ selectedTrainingCenter ? formatBurPercent(selectedTrainingCenter.BUR) : '0.00%' }}</p>
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div class="lg:col-span-7 modal-wps">
+              <div class="modal-wps-inner">
+                <p class="modal-wps-value tabular-nums">
+                  {{ selectedTrainingCenter ? (numericWpsForRank(selectedTrainingCenter.WPS) * 100).toFixed(2) : '0.00' }}
+                </p>
+                <div class="modal-wps-meta">
+                  <span :class="['status-badge', selectedTrainingCenter ? getStatusClass(selectedTrainingCenter) : 'status-critical']">
+                    {{ selectedTrainingCenter ? getStatus(selectedTrainingCenter) : 'N/A' }}
+                  </span>
+                  <p class="text-sm font-semibold text-white/90 mt-2">Weighted Performance Score</p>
+                </div>
+
+                <p class="text-xs text-white/80 mt-4 leading-relaxed">
+                  {{ selectedInsights?.wps || selectedInsights?.bur || selectedInsights?.bsc || '—' }}
+                </p>
+              </div>
             </div>
-            <div class="modal-stat">
-              <p class="modal-stat-label">Billing Submission Compliance Rate</p>
-              <p class="modal-stat-value tabular-nums">{{ selectedTrainingCenter ? formatBscPercent(selectedTrainingCenter.BSC) : '0.00%' }}</p>
+
+            <div class="lg:col-span-5 grid grid-cols-2 gap-3">
+              <div class="modal-mini">
+                <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatBurPercent(selectedTrainingCenter.BUR) : '—' }}</p>
+                <p class="modal-mini-label">Budget Utilization Rate</p>
+              </div>
+              <div class="modal-mini">
+                <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatBscPercent(selectedTrainingCenter.BSC) : '—' }}</p>
+                <p class="modal-mini-label">Billing Compliance</p>
+              </div>
+              <div class="modal-mini">
+                <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatOptionalPercent(selectedTrainingCenter.ENR) : '—' }}</p>
+                <p class="modal-mini-label">Enrollment Rate</p>
+              </div>
+              <div class="modal-mini">
+                <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatOptionalPercent(selectedTrainingCenter.CRR) : '—' }}</p>
+                <p class="modal-mini-label">Completion Rate</p>
+              </div>
+              <div class="modal-mini col-span-2">
+                <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatOptionalPercent(selectedTrainingCenter.ASR) : '—' }}</p>
+                <p class="modal-mini-label">Assessment Rate</p>
+              </div>
             </div>
-            <div class="modal-stat">
-              <p class="modal-stat-label">Weighted Performance Score</p>
-              <p class="modal-stat-value tabular-nums">{{ selectedTrainingCenter ? formatWps(selectedTrainingCenter.WPS) : '0.000' }}</p>
+          </div>
+
+          <div class="mt-4 border border-slate-200 rounded-xl overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-xs">
+                <thead>
+                  <tr class="bg-slate-100 text-slate-700">
+                    <th class="px-3 py-2 text-left whitespace-nowrap">Training Center</th>
+                    <th class="px-3 py-2 text-center whitespace-nowrap">Allocated Budget</th>
+                    <th class="px-3 py-2 text-center whitespace-nowrap">Utilized Budget</th>
+                    <th class="px-3 py-2 text-center whitespace-nowrap">Billable Submissions</th>
+                    <th class="px-3 py-2 text-center whitespace-nowrap">On-Time/Correct</th>
+                    <th class="px-3 py-2 text-center whitespace-nowrap">Approved Slots</th>
+                    <th class="px-3 py-2 text-center whitespace-nowrap">Enrolled</th>
+                    <th class="px-3 py-2 text-center whitespace-nowrap">Completed</th>
+                    <th class="px-3 py-2 text-center whitespace-nowrap">Dropped</th>
+                    <th class="px-3 py-2 text-center whitespace-nowrap">Assessed</th>
+                    <th class="px-3 py-2 text-center whitespace-nowrap">Competent</th>
+                    <th class="px-3 py-2 text-center whitespace-nowrap">Not Yet Competent</th>
+                    <th class="px-3 py-2 text-center whitespace-nowrap">Absent</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-b border-slate-100">
+                    <td class="px-3 py-2 font-semibold text-slate-800 whitespace-nowrap">
+                      {{ selectedTrainingCenter?.abbre || selectedTrainingCenter?.trainingCenter || '—' }}
+                    </td>
+                    <td class="px-3 py-2 text-center tabular-nums">{{ formatCurrency(modalStats?.total_payment) }}</td>
+                    <td class="px-3 py-2 text-center tabular-nums">{{ formatCurrency(modalStats?.total_utilized) }}</td>
+                    <td class="px-3 py-2 text-center tabular-nums">{{ formatCount(selectedTrainingCenter?.totalBillableSubmissions) }}</td>
+                    <td class="px-3 py-2 text-center tabular-nums">{{ formatCount(selectedTrainingCenter?.onTimeCorrectSubmissions) }}</td>
+                    <td class="px-3 py-2 text-center tabular-nums">{{ formatCount(selectedTrainingCenter?.approvedSlots) }}</td>
+                    <td class="px-3 py-2 text-center tabular-nums">—</td>
+                    <td class="px-3 py-2 text-center tabular-nums">—</td>
+                    <td class="px-3 py-2 text-center tabular-nums">—</td>
+                    <td class="px-3 py-2 text-center tabular-nums">—</td>
+                    <td class="px-3 py-2 text-center tabular-nums">—</td>
+                    <td class="px-3 py-2 text-center tabular-nums">—</td>
+                    <td class="px-3 py-2 text-center tabular-nums">—</td>
+                  </tr>
+                  <tr class="bg-slate-50">
+                    <td class="px-3 py-2 font-bold text-slate-800 whitespace-nowrap">TOTAL</td>
+                    <td class="px-3 py-2 text-center font-semibold tabular-nums">{{ formatCurrency(modalStats?.total_payment) }}</td>
+                    <td class="px-3 py-2 text-center font-semibold tabular-nums">{{ formatCurrency(modalStats?.total_utilized) }}</td>
+                    <td class="px-3 py-2 text-center font-semibold tabular-nums">{{ formatCount(selectedTrainingCenter?.totalBillableSubmissions) }}</td>
+                    <td class="px-3 py-2 text-center font-semibold tabular-nums">{{ formatCount(selectedTrainingCenter?.onTimeCorrectSubmissions) }}</td>
+                    <td class="px-3 py-2 text-center font-semibold tabular-nums">{{ formatCount(selectedTrainingCenter?.approvedSlots) }}</td>
+                    <td class="px-3 py-2 text-center font-semibold tabular-nums">—</td>
+                    <td class="px-3 py-2 text-center font-semibold tabular-nums">—</td>
+                    <td class="px-3 py-2 text-center font-semibold tabular-nums">—</td>
+                    <td class="px-3 py-2 text-center font-semibold tabular-nums">—</td>
+                    <td class="px-3 py-2 text-center font-semibold tabular-nums">—</td>
+                    <td class="px-3 py-2 text-center font-semibold tabular-nums">—</td>
+                    <td class="px-3 py-2 text-center font-semibold tabular-nums">—</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div class="modal-stat">
-              <p class="modal-stat-label">Overall Status</p>
-              <p class="modal-stat-value text-base">
-                <span :class="['status-badge', selectedTrainingCenter ? getStatusClass(selectedTrainingCenter) : 'status-critical']">
-                  {{ selectedTrainingCenter ? getStatus(selectedTrainingCenter) : 'N/A' }}
-                </span>
-              </p>
-            </div>
+            <div v-if="modalStatsLoading" class="px-4 py-3 text-xs text-slate-500 border-t border-slate-200">Loading summary…</div>
           </div>
 
           <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -406,11 +493,14 @@ export default {
       selectedInsights: {
         bur: '',
         bsc: '',
+        wps: '',
       },
       loadingInsights: false,
       loadingInsightsTable: false,
       insightsTableError: null,
       modalInsightRows: [],
+      modalStatsLoading: false,
+      modalStats: null,
     };
   },
   computed: {
@@ -462,6 +552,12 @@ export default {
         const ky = this.normalizeName(abbre);
         const center = centerByAbbre[ky] || {};
         const centerName = (center.description || center.name || abbre || '—').trim();
+        const enr = this.firstNumber(row, ['ENR', 'enrollment_rate', 'enrollmentRate', 'enrollment']);
+        const crr = this.firstNumber(row, ['CRR', 'completion_rate', 'completionRate', 'completion']);
+        const asr = this.firstNumber(row, ['ASR', 'assessment_rate', 'assessmentRate', 'assessment']);
+        const totalBillableSubmissions = this.firstNumber(row, ['totalBillableSubmissions', 'total_submissions', 'totalSubmissions', 'billableSubmissions']);
+        const onTimeCorrectSubmissions = this.firstNumber(row, ['onTimeCorrectSubmissions', 'onTimeSubmissions', 'on_time_submissions', 'onTime']);
+        const approvedSlots = this.firstNumber(row, ['approvedSlots', 'approved_slots', 'slots']);
         return {
           id: center.id != null ? center.id : null,
           logoKey: center.id != null ? center.id : abbre || ky,
@@ -470,6 +566,12 @@ export default {
           BUR: Number(row.BUR ?? 0),
           BSC: Number(row.BSC ?? 0),
           WPS: Number(row.WPS ?? 0),
+          ENR: enr,
+          CRR: crr,
+          ASR: asr,
+          totalBillableSubmissions,
+          onTimeCorrectSubmissions,
+          approvedSlots,
         };
       });
     },
@@ -573,23 +675,50 @@ export default {
     async openTrainingCenterModal(item) {
       this.selectedTrainingCenter = item;
       this.isTrainingCenterModalOpen = true;
+      document.body.style.overflow = 'hidden';
       this.insightsTableError = null;
       this.modalInsightRows = [];
+      this.modalStats = null;
       await this.loadInsightsForTrainingCenter(item);
+      await this.loadTrainingCenterStats(item);
     },
     closeTrainingCenterModal() {
       this.isTrainingCenterModalOpen = false;
+      document.body.style.overflow = '';
       this.selectedTrainingCenter = null;
-      this.selectedInsights = { bur: '', bsc: '' };
+      this.selectedInsights = { bur: '', bsc: '', wps: '' };
       this.modalInsightRows = [];
       this.loadingInsights = false;
       this.loadingInsightsTable = false;
+      this.modalStatsLoading = false;
+      this.modalStats = null;
+    },
+    async loadTrainingCenterStats(item) {
+      this.modalStatsLoading = true;
+      try {
+        const fiscalYear = this.selectedFiscalYear || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`;
+        const tcId = item?.id;
+        if (!tcId) {
+          this.modalStats = null;
+          return;
+        }
+        const res = await axios.get(`${process.env.VUE_APP_BASE_URL}/billing_periods/get_statistics/${tcId}/${fiscalYear}`);
+        if (res.status === 200 && res.data && typeof res.data === 'object') {
+          this.modalStats = res.data;
+        } else {
+          this.modalStats = null;
+        }
+      } catch (e) {
+        this.modalStats = null;
+      } finally {
+        this.modalStatsLoading = false;
+      }
     },
     async loadInsightsForTrainingCenter(item) {
       this.loadingInsights = true;
       this.loadingInsightsTable = true;
       this.insightsTableError = null;
-      this.selectedInsights = { bur: '', bsc: '' };
+      this.selectedInsights = { bur: '', bsc: '', wps: '' };
       this.modalInsightRows = [];
 
       const burScore = this.toInsightScore(item.BUR);
@@ -608,6 +737,7 @@ export default {
 
         this.selectedInsights.bur = burRow?.description ?? '';
         this.selectedInsights.bsc = bscRow?.description ?? '';
+        this.selectedInsights.wps = wpsRow?.description ?? '';
 
         const rows = [burRow, bscRow, wpsRow].filter(Boolean);
         const seen = new Set();
@@ -678,6 +808,32 @@ export default {
       const n = Number(value ?? 0);
       const wps = n > 1 ? n / 100 : n;
       return wps.toFixed(3);
+    },
+    formatOptionalPercent(value) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return '—';
+      return `${this.dashboardRatePercent(n).toFixed(2)}%`;
+    },
+    firstNumber(obj, keys) {
+      if (!obj || typeof obj !== 'object') return null;
+      for (let i = 0; i < keys.length; i++) {
+        const k = keys[i];
+        if (Object.prototype.hasOwnProperty.call(obj, k)) {
+          const v = Number(obj[k]);
+          if (Number.isFinite(v)) return v;
+        }
+      }
+      return null;
+    },
+    formatCurrency(value) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return '—';
+      return new Intl.NumberFormat('en-PH', { maximumFractionDigits: 0 }).format(n);
+    },
+    formatCount(value) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return '—';
+      return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n);
     },
     formatPercent(value) {
       return this.toPercent(value).toFixed(2);
@@ -926,6 +1082,52 @@ export default {
 
 .modal-header {
   background: linear-gradient(120deg, #1e40af 0%, #2563eb 55%, #0891b2 100%);
+}
+
+.modal-wps {
+  border-radius: 1rem;
+  background: linear-gradient(120deg, #0ea5e9 0%, #2563eb 55%, #1d4ed8 100%);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+  overflow: hidden;
+}
+
+.modal-wps-inner {
+  padding: 1.15rem 1.25rem;
+  position: relative;
+}
+
+.modal-wps-value {
+  font-size: 3.25rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.modal-wps-meta {
+  margin-top: 0.35rem;
+}
+
+.modal-mini {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.9rem;
+  padding: 0.85rem 0.9rem;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.modal-mini-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0ea5e9;
+  line-height: 1;
+}
+
+.modal-mini-label {
+  margin-top: 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 .modal-stat {

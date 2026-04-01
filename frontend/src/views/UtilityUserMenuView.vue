@@ -1,160 +1,93 @@
 <template>
-    <div>
+  <div class="flex-auto flex flex-col px-6 py-5">
+    <div class="flex items-center justify-between gap-3">
+      <p class="text-2xl font-bold text-slate-800">User Menu</p>
 
-      <div class="sm:flex items-center sm:space-x-4 space-y-4 sm:space-y-0">
-        <p class="flex-auto font-bold text-lg text-gray-700">User Menu</p>
+      <button @click="showAddModal(0, 'add')" class="bg-primary-600 hover:bg-primary-500 rounded-xl px-5 py-2.5 text-sm text-white font-semibold shadow-sm flex items-center gap-2">
+        <span class="inline-flex items-center justify-center w-5 h-5 rounded-md bg-white/15">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </span>
+        + Add Menu
+      </button>
+    </div>
 
-          <button @click="showAddModal(0, 'add')" class="bg-green-500 border rounded-3xl px-6 py-2 text-sm sm:flex-none sm:w-auto text-white font-medium hover:bg-green-600">
-            + Add Menu
-        </button>
+    <div class="mt-5 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <!-- Meta / controls row (matches screenshot style) -->
+      <div class="px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white">
+        <div class="text-sm text-slate-500">
+          Showing <span class="font-semibold text-slate-700">1</span> to
+          <select v-model="page_limit" @change="refreshData" class="ml-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="250">250</option>
+            <option value="500">500</option>
+          </select>
+          <span class="ml-2">of <span class="font-bold text-slate-700">{{ total_cnt }}</span> results</span>
+        </div>
 
+        <div v-if="alldata.length > 0" class="flex items-center gap-2">
+          <button type="button" @click="changePageByClick('minus')" class="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50">
+            <span class="sr-only">Prev</span>
+            ‹
+          </button>
+          <span class="h-9 w-9 rounded-full bg-primary-600 text-white flex items-center justify-center text-sm font-bold">{{ page }}</span>
+          <button type="button" @click="changePageByClick('add')" class="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50">
+            <span class="sr-only">Next</span>
+            ›
+          </button>
+        </div>
       </div>
-  
-      
-  
-  
-  <div class="bg-white p-2 rounded-md mt-4">
 
-    <div class="flex items-center justify-between bg-white px-4 py-3 sm:px-6" >
-  <div class="flex flex-1 justify-between sm:hidden">
-    <span @click="changePageByClick('minus')" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">Previous</span>
-    <span @click="changePageByClick('add')" class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">Next</span>
-  </div>
-  <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-    <div>
-      <p class="text-sm text-gray-700">
-        Showing
-        <span class="font-medium">1</span>
-        to
-        <span>
-          <select v-model="page_limit" @change="refreshData" class="text-sm pl-2 pr-8 py-1 mx-2 rounded-lg">
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-            <option value="250">250</option>
-            <option value="500">500</option>
-          </select>
-
-        </span>
-        of
-        <span class="font-bold">{{total_cnt}}</span>
-        results
-      </p>
-    </div> 
-
-    <div v-if="alldata.length > 0">
-      <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-        <span @click="changePageByClick('minus')" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 cursor-pointer">
-          <span class="sr-only">Previous</span>
-          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
-          </svg>
-        </span>
-        <span v-for="i in page_list" v-bind:key="i.id" aria-current="page" class="relative z-10 inline-flex items-center px-4 py-2 text-xs font-semibold focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 hover:cursor-pointer" :class="page == i.id ? 'bg-green-500 focus-visible:outline-green-600 text-white' : 'bg-white text-gray-700 ring-gray-300 ring-1 ring-inset'" @click="changePage(i.id)">{{ i.id }}</span>
-
-        <!-- <span v-if="allmyrecords.length > 7" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">...</span> -->
-
-        <span @click="changePageByClick('add')" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 cursor-pointer">
-          <span class="sr-only">Next</span>
-          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
-          </svg>
-        </span>
-      </nav>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm text-left text-slate-600">
+          <thead class="text-[11px] text-slate-500 uppercase bg-slate-50">
+            <tr>
+              <th scope="col" class="px-6 py-4 text-center w-24">Icon</th>
+              <th scope="col" class="px-6 py-4 text-left">Name</th>
+              <th scope="col" class="px-6 py-4 text-left">Title</th>
+              <th scope="col" class="px-6 py-4 text-left">Link</th>
+              <th scope="col" class="px-6 py-4 text-left w-24">Type</th>
+              <th scope="col" class="px-6 py-4 text-left w-52">Date &amp; Time Added</th>
+              <th scope="col" class="px-6 py-4 text-center w-28">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 bg-white">
+            <tr v-for="i in alldata" :key="i.id" class="hover:bg-slate-50/80">
+              <td class="py-4 px-6 text-center">
+                <img :src="getImgUrl(i.profile_pic)" class="w-9 h-9 rounded-lg object-cover mx-auto" alt="" />
+              </td>
+              <td class="py-4 px-6 font-semibold text-slate-700">{{ i.name }}</td>
+              <td class="py-4 px-6">{{ i.title }}</td>
+              <td class="py-4 px-6 text-primary-700">{{ i.link }}</td>
+              <td class="py-4 px-6">
+                <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold" :class="i.isTitle == 1 ? 'bg-slate-100 text-slate-700' : 'bg-sky-100 text-sky-700'">
+                  {{ checkTitle(i.isTitle) }}
+                </span>
+              </td>
+              <td class="py-4 px-6 text-slate-500">{{ getDateTimeFormat(i.datetime_added) }}</td>
+              <td class="py-4 px-6">
+                <div class="flex items-center justify-center gap-3">
+                  <button type="button" class="text-slate-400 hover:text-primary-600" @click="showAddModal(i.id, 'edit')" aria-label="Edit">
+                    <img src="../assets/action_icon_edit.png" class="h-4 w-auto" alt="" />
+                  </button>
+                  <button type="button" class="text-slate-400 hover:text-rose-600" @click="showSubModal(i, 'delete menu')" aria-label="Delete">
+                    <img src="../assets/action_icon_delete.png" class="h-4 w-auto" alt="" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-
-  </div>
-</div>
-
-    <table class="min-w-full divide-y divide-gray-300">
-                          <thead class="bg-white">
-                          <tr class="text-white">
-                            <th scope="col" class="py-4 px-4 text-gray-500 font-bold text-center text-sm w-auto">Icon</th>
-                              <th scope="col" class="py-4 px-4 text-gray-500 font-bold text-left text-sm sm:pl-4 w-auto">Name</th>
-                              <th scope="col" class="py-4 px-4 text-gray-500 font-bold text-left text-sm sm:pl-4 w-auto">Title</th>
-                              <th scope="col" class="py-4 px-4 text-gray-500 font-bold text-left text-sm sm:pl-4 w-auto">Link</th>
-                              <th scope="col" class="py-4 px-4 text-gray-500 font-bold text-left text-sm sm:pl-4 w-auto">Type</th>
-                              <th scope="col" class="py-4 px-4 text-gray-500 font-bold text-left text-sm sm:pl-4 w-auto">Date & Time Added</th>
-                              
-                              <th scope="col" class="py-4 px-4 text-gray-500 font-bold text-center text-sm w-auto">Actions</th>
-                          </tr>
-                          </thead>
-                          <tbody class="divide-y divide-gray-200 bg-white">
-                          <tr v-for="i in alldata" v-bind:key="i.id" class="hover:bg-gray-200">
-  
-                            <td class="py-4 px-4 text-sm text-gray-500 bg-gray-200 text-center">
-                            <img :src="getImgUrl(i.profile_pic)" class="bi bi-house px-2 text-xl text-center w-10 mx-auto">
-                          </td>
-                            <td class="py-4 px-4 text-sm text-gray-500">{{i.name}}</td>
-                            <td class="py-4 px-4 text-sm text-gray-500">{{i.title}}</td>
-                            <td class="py-4 px-4 text-sm text-gray-500">{{i.link}}</td>
-                            <td class="py-4 px-4 text-sm text-gray-500">{{checkTitle(i.isTitle)}}</td>
-                            <td class="py-4 px-4 text-sm text-gray-500">{{getDateTimeFormat(i.datetime_added)}}</td>
-                              <td class="py-4 px-4 flex items-center justify-center space-x-2">
-                                  <img src="../assets/action_icon_edit.png" @click="showAddModal(i.id, 'edit')" class="h-4 w-auto cursor-pointer">
-                                  <img src="../assets/action_icon_delete.png" @click="showSubModal(i,'delete menu')" class="h-4 w-auto cursor-pointer">
-                              </td>
-                          </tr>
-  
-                          </tbody>
-                      </table>
-
-                      <div class="flex items-center justify-between bg-white px-4 py-3 sm:px-6" >
-  <div class="flex flex-1 justify-between sm:hidden">
-    <span @click="changePageByClick('minus')" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">Previous</span>
-    <span @click="changePageByClick('add')" class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">Next</span>
-  </div>
-  <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-    <div>
-      <p class="text-sm text-gray-700">
-        Showing
-        <span class="font-medium">1</span>
-        to
-        <span>
-          <select v-model="page_limit" @change="refreshData" class="text-sm pl-2 pr-8 py-1 mx-2 rounded-lg">
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-            <option value="250">250</option>
-            <option value="500">500</option>
-          </select>
-        </span>
-        of
-        <span class="font-bold">{{total_cnt}}</span>
-        results
-      </p>
-    </div>
-
-    <div v-if="alldata.length > 0">
-      <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-        <span @click="changePageByClick('minus')" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 cursor-pointer">
-          <span class="sr-only">Previous</span>
-          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
-          </svg>
-        </span>
-        <span v-for="i in page_list" v-bind:key="i.id" aria-current="page" class="relative z-10 inline-flex items-center px-4 py-2 text-xs font-semibold focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 hover:cursor-pointer" :class="page == i.id ? 'bg-green-500 focus-visible:outline-green-600 text-white' : 'bg-white text-gray-700 ring-gray-300 ring-1 ring-inset'" @click="changePage(i.id)">{{ i.id }}</span>
-
-        <!-- <span v-if="allmyrecords.length > 7" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">...</span> -->
-
-        <span @click="changePageByClick('add')" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 cursor-pointer">
-          <span class="sr-only">Next</span>
-          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
-          </svg>
-        </span>
-      </nav>
-    </div>
-
-  </div>
-</div>
-
   </div>
   
   <PromptModal v-if="show_PromptModal" @close-modal="show_PromptModal = false" :refreshData="refreshData" :prompt_data="prompt_data" :showNotification="showNotification"/>
   <AddMenuModal v-if="show_AddModal" @close-modal="show_AddModal = false" :refreshData="refreshData" :item_data="item_data" :showNotification="showNotification"/>
   
-    </div>
   </template>
   
   <script>
@@ -168,7 +101,7 @@
   export default{
   data(){
     return {
-      alldata : '',
+      alldata : [],
       activeClass : 'bg-green-600 text-white',
       inactiveClass : 'bg-none text-gray-600',
       selected_id : 0,

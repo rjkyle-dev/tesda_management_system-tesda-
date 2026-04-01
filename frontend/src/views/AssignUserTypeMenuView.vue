@@ -1,79 +1,106 @@
 <template>
-    <div class="h-auto">
-
-      <div class="sm:flex items-center sm:space-x-4 space-y-4 sm:space-y-0">
-        <p class="flex-auto font-bold text-lg text-gray-700">Assign User Menu</p>
-
-
-      </div>
-  
-      
-  
-  
-  <div class="bg-white p-2 rounded-md mt-4 min-h-full">
-
-    <select v-model="ut_id" @change="refreshData" class="pl-2 pr-8 py-1 mx-2 my-2 rounded-lg text-md">
-            <option v-for="i in allusertypes" v-bind:key="i.id" v-bind:value="i.id">{{ i.description }}</option>
-          </select>
-
-          <button v-if="assignOnProgress" @click="resetSelect" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded-lg">
-            Clear
-          </button>
-
-    
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2">
-
-        <div>
-
-            <p class="flex-auto font-bold text-lg text-gray-700 my-2">Assigned Modules <span class="text-green-600">({{ alldata.length }})</span></p>
-
-            <div class="h-96 overflow-y-auto border space-y-2 p-4">
-
-            <div v-for="i in alldata" v-bind:key="i.id" class="flex items-center hover:border-green-600 border p-2">
-              <div class="flex-auto text-gray-700" :class="i.parent_id == 0 ? 'pl-4' : padding[i.position-1]">
-                {{i.um_id.name}} - ({{i.um_id.title}})
-              </div>
-              <div class="flex-none flex items-center space-x-2">
-                <img v-if="assignOnProgress && i.parent_id == 0" src="../assets/action_icon_drop_item.png" @click="setItem(i,1)" class="h-4 w-auto cursor-pointer hover:animate-bounce hover:h-6">
-                <img v-if="i.parent_id == 0 && !assignOnProgress" src="../assets/action_icon_select.png" @click="selectItem(i)" class="h-4 w-auto cursor-pointer">
-                <img v-if="i.parent_id > 0 && !assignOnProgress" src="../assets/action_icon_delete.png" @click="setItem(i, 0)" class="h-4 w-auto cursor-pointer">
-                <img v-if="!assignOnProgress" src="../assets/action_icon_swap.png" @click="swapItem(i.id, 'remove')" class="h-4 w-auto cursor-pointer">
-              </div>
-
-            </div>
-            </div>
-
-        </div>
-
-        <div>
-
-            <p class="flex-auto font-bold text-lg text-gray-700 my-2">Available Modules <span class="text-green-600">({{ allusermenu.length }})</span></p>
-
-            <div class="h-96 overflow-y-auto border space-y-2 p-4">
-
-              <div v-for="i in allusermenu" v-bind:key="i.id" class="flex items-center hover:border-green-600 border p-2">
-                <div class="flex-auto text-gray-700" :class="i.isTitle == 1 ? 'font-bold' : 'font-normal'">
-                  {{i.name}} - ({{i.title}})
-                </div>
-                <div class="flex-none items-center">
-                  <img src="../assets/action_icon_swap.png" @click="swapItem(i.id, 'add')" class="h-4 w-auto cursor-pointer">
-                </div>
-
-            </div>
-            </div>
-
-        </div>
-
+  <div class="flex-auto flex flex-col px-6 py-5">
+    <div class="flex items-center gap-3">
+      <p class="text-2xl font-bold text-slate-800">Assign User Menu</p>
     </div>
 
-    
+    <!-- User type selector -->
+    <div class="mt-4 bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div class="flex items-center gap-3">
+          <span class="text-sm font-semibold text-slate-500">User Type</span>
+          <select v-model="ut_id" @change="refreshData" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+            <option v-for="i in allusertypes" :key="i.id" :value="i.id">{{ i.description }}</option>
+          </select>
+        </div>
 
+        <button v-if="assignOnProgress" type="button" @click="resetSelect" class="w-fit bg-primary-600 hover:bg-primary-500 text-white px-4 py-2 rounded-xl duration-200 shadow-sm">
+          Clear
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Assigned -->
+      <div>
+        <div class="flex items-baseline justify-between mb-3">
+          <p class="text-lg font-bold text-slate-800">
+            Assigned Modules <span class="text-emerald-600">({{ alldata.length }})</span>
+          </p>
+        </div>
+
+        <div class="h-[520px] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
+          <div
+            v-for="i in alldata"
+            :key="i.id"
+            class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm hover:border-primary-300 hover:shadow transition"
+          >
+            <div class="flex-1 min-w-0 text-slate-800 font-semibold" :class="i.parent_id == 0 ? 'pl-4' : padding[i.position-1]">
+              <span class="truncate block">
+                {{ i.um_id.name }} <span class="text-slate-400 font-medium">– ({{ i.um_id.title }})</span>
+              </span>
+            </div>
+
+            <div class="shrink-0 flex items-center gap-3">
+              <img
+                v-if="assignOnProgress && i.parent_id == 0"
+                src="../assets/action_icon_drop_item.png"
+                @click="setItem(i, 1)"
+                class="h-4 w-auto cursor-pointer"
+                alt=""
+              />
+              <img
+                v-if="i.parent_id == 0 && !assignOnProgress"
+                src="../assets/action_icon_select.png"
+                @click="selectItem(i)"
+                class="h-4 w-auto cursor-pointer"
+                alt=""
+              />
+              <img
+                v-if="i.parent_id > 0 && !assignOnProgress"
+                src="../assets/action_icon_delete.png"
+                @click="setItem(i, 0)"
+                class="h-4 w-auto cursor-pointer"
+                alt=""
+              />
+              <img v-if="!assignOnProgress" src="../assets/action_icon_swap.png" @click="swapItem(i.id, 'remove')" class="h-4 w-auto cursor-pointer" alt="" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Available -->
+      <div>
+        <div class="flex items-baseline justify-between mb-3">
+          <p class="text-lg font-bold text-slate-800">
+            Available Modules <span class="text-emerald-600">({{ allusermenu.length }})</span>
+          </p>
+        </div>
+
+        <div class="h-[520px] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
+          <div
+            v-for="i in allusermenu"
+            :key="i.id"
+            class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm hover:border-primary-300 hover:shadow transition"
+          >
+            <div class="flex-1 min-w-0 text-slate-800" :class="i.isTitle == 1 ? 'font-bold' : 'font-semibold'">
+              <span class="truncate block">
+                {{ i.name }} <span class="text-slate-400 font-medium">– ({{ i.title }})</span>
+              </span>
+            </div>
+
+            <div class="shrink-0 flex items-center">
+              <img src="../assets/action_icon_swap.png" @click="swapItem(i.id, 'add')" class="h-4 w-auto cursor-pointer" alt="" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   
   <PromptModal v-if="show_PromptModal" @close-modal="show_PromptModal = false" :refreshData="refreshData" :prompt_data="prompt_data" :showNotification="showNotification"/>
   <AddMenuModal v-if="show_AddModal" @close-modal="show_AddModal = false" :refreshData="refreshData" :item_data="item_data" :showNotification="showNotification"/>
   
-    </div>
   </template>
   
   <script>
@@ -87,9 +114,9 @@
   export default{
   data(){
     return {
-      alldata : '',
-      allusertypes : '',
-      allusermenu : '',
+      alldata : [],
+      allusertypes : [],
+      allusermenu : [],
       activeClass : 'bg-green-600 text-white',
       inactiveClass : 'bg-none text-gray-600',
       page: 1,
@@ -189,10 +216,10 @@
       return process.env.VUE_APP_BASE_URL + "/user_menu/get_file/"+imagePath+"/png";
     },
     refreshData(){
-        this.allusermenu.splice(0);
-        this.alldata.splice(0);
-    this.getAll();
-  },
+      this.allusermenu = [];
+      this.alldata = [];
+      this.getAll();
+    },
   getUserTypes(){
 //
 axios.get(process.env.VUE_APP_BASE_URL + '/user_types/get_user_types')

@@ -92,7 +92,7 @@
         >
           {{ profileInitials }}
         </div>
-        <span class="hidden sm:inline text-sm font-semibold text-slate-800 max-w-[7rem] truncate">
+        <span v-if="shortRoleLabel" class="hidden sm:inline text-sm font-semibold text-slate-800 max-w-[7rem] truncate">
           {{ shortRoleLabel }}
         </span>
         <svg class="w-4 h-4 text-slate-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,7 +157,7 @@ export default {
     shortRoleLabel() {
       const d = this.$store.state.user?.ut_id?.description;
       if (d === 'Admin') return 'Admin';
-      return d || 'Account';
+      return d || '';
     },
     profileInitials() {
       const u = this.$store.state.user;
