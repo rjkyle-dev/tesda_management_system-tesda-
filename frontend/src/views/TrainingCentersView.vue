@@ -1,84 +1,95 @@
 <template>
-    <div class="flex-auto flex flex-col">
+    <div class="flex-auto flex flex-col page-anim">
 
-        <div class="bg-white border-b py-3">
-        <div class="flex items-center w-full gap-3">
-        <div class="flex-none sm:flex-none">
-            <button class="bg-primary-600 hover:bg-primary-500 text-white px-4 py-2 ml-2 my-2 rounded-lg duration-300" @click="openModal('add',0)">
-                Add Training Center +
-            </button>
+        <div class="px-6 pt-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <h1 class="text-2xl font-semibold text-slate-900">Training Centers</h1>
 
-            <button class="bg-primary-600 hover:bg-primary-500 text-white px-4 py-2 mx-2 my-2 rounded-lg duration-300" @click="generateSummary()">
-                Generate Summary
-            </button>
-        </div>
-        <div class="flex-none sm:flex-auto">
-            <input type="text" class="w-full rounded-md border-gray-300 text-sm focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 px-3 py-2" placeholder="Search training center.." @input="getAllData($event.target.value, 'search')">
-        </div>
-        <div class="flex-auto sm:flex-none">
-            <div class="pagination_cmp px-3" v-if="alldata.length > page_limit">
-                <vue-awesome-paginate 
-                :total-items="total_cnt" 
-                :items-per-page="page_limit"
-                v-model="page"
-                @click="getAllData(null,null)">
-                <template #prev-button>
-                    <span>
-                    <!-- <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="black"
-                        width="8"
-                        height="8"
-                        viewBox="0 0 24 24"
+                <div class="flex items-center gap-2">
+                    <button
+                        class="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg duration-200 shadow-sm"
+                        @click="openModal('add',0)"
                     >
-                        <path d="M8.122 24l-4.122-4 8-8-8-8 4.122-4 11.878 12z" />
-                    </svg> -->
-                    Prev
-                    </span>
-                </template>
+                        <span class="text-base leading-none">+</span>
+                        <span class="text-sm font-semibold">Add Training Center</span>
+                    </button>
 
-                <template #next-button>
-                    <span>
-                    Next
-                    <!-- <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="black"
-                        width="8"
-                        height="8"
-                        viewBox="0 0 24 24"
+                    <button
+                        class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg duration-200 shadow-sm"
+                        @click="generateSummary()"
                     >
-                        <path d="M8.122 24l-4.122-4 8-8-8-8 4.122-4 11.878 12z" />
-                    </svg> -->
+                        <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4">
+                            <path
+                                d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linejoin="round"
+                            />
+                            <path
+                                d="M14 3v5h5"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linejoin="round"
+                            />
+                            <path
+                                d="M8 13h8M8 17h6"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                            />
+                        </svg>
+                        <span class="text-sm font-semibold">Generate Summary</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <div class="relative max-w-xl">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4">
+                            <path
+                                d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                            />
+                            <path
+                                d="M21 21l-4.35-4.35"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                            />
+                        </svg>
                     </span>
-                </template>
-                </vue-awesome-paginate>
+                    <input
+                        type="text"
+                        class="w-full rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 px-10 py-2.5 shadow-sm"
+                        placeholder="Search training center..."
+                        @input="getAllData($event.target.value, 'search')"
+                    >
+                </div>
             </div>
         </div>
-    </div>
-    </div>
 
-        <div class="bg-white m-4 p-4 rounded-md shadow-sm">
-
-
-        <div class="relative scrollbar sm:rounded-lg border">
+        <div class="bg-white mx-6 my-5 rounded-2xl shadow-sm border border-slate-100">
+        <div class="relative scrollbar sm:rounded-2xl overflow-hidden">
 
         <table class="w-full text-sm text-left text-gray-500">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+            <thead class="text-xs text-slate-500 uppercase bg-slate-50">
                 <tr>
-                    <th scope="col" class="px-6 py-3 w-16 text-left">
+                    <th scope="col" class="px-6 py-4 text-left">
                     Name
                     </th>
-                    <th scope="col" class="px-6 py-3 w-16 text-center">
-                    Abbreviation
+                    <th scope="col" class="px-6 py-4 w-24 text-center">
+                    Abbr
                     </th>
-                    <th scope="col" class="px-6 py-3 w-16 text-center">
+                    <th scope="col" class="px-6 py-4 w-64 text-left">
                     Type
                     </th>
-                    <th scope="col" class="px-6 py-3 w-16 text-center">
+                    <th scope="col" class="px-6 py-4 text-left">
                     Address
                     </th>
-                    <th scope="col" class="py-3 text-center w-28">
-                    Date & Time added
+                    <th scope="col" class="px-6 py-4 w-56 text-left">
+                    Date Added
                     </th>
                     <!-- <th scope="col" class="px-6 py-3 text-center">
                     Approval Status
@@ -86,7 +97,7 @@
                     <!-- <th scope="col" class="px-6 py-3 text-center w-10">
                     Released
                     </th> -->
-                    <th scope="col" class="px-6 py-3 text-center w-28">
+                    <th scope="col" class="px-6 py-4 text-center w-28">
                     Actions
                     </th>
                 </tr>
@@ -99,42 +110,90 @@
                 </td>
             </tr>
 
-                <tr v-for="i in alldata" v-bind:key="i.id" class="border-b hover:bg-gray-100 transition">
-                    <td class="py-4 px-6 text-left w-16">
+                <tr
+                    v-for="(i, idx) in alldata"
+                    v-bind:key="i.id"
+                    class="border-b border-slate-100 hover:bg-slate-50 transition item-anim"
+                    :style="{ animationDelay: `${Math.min(idx, 20) * 30}ms` }"
+                >
+                    <td class="py-5 px-6 text-left font-semibold text-slate-800">
                     {{checkIfEmpty(i.description)}}
                     </td>
-                    <td class="py-4 px-2 text-center w-16">
+                    <td class="py-5 px-6 text-center font-medium text-slate-600">
                     {{checkIfEmpty(i.abbre)}}
                     </td>
-                    <td class="py-4 px-2 text-center w-16">
+                    <td class="py-5 px-6 text-left text-slate-600">
                     {{i.tc_type_id ? i.tc_type_id.description : '-'}}
                     </td>
-                    <td class="py-4 px-2 text-center w-16">
+                    <td class="py-5 px-6 text-left text-slate-500">
                     {{i.address ? i.address + ', ' + i.province : '-'}}
                     </td>
-                    <td class="px-2 py-4 text-center w-28">
+                    <td class="px-6 py-5 text-left text-slate-500">
                     {{getDateTimeFormat(i.datetime_added)}}
                     </td>
-                    <td class="px-6 py-4 text-center w-auto">
-                    <div class="flex items-center justify-center h-full"> 
-                        <span class="flex items-center space-x-2">
-                        <img src="../assets/icon_edit.png"
-                            class="h-4 w-auto cursor-pointer"
-                            @click="openModal('edit', i.id)" />
-                        <img src="../assets/action_icon_view.png"
-                            class="h-4 w-auto cursor-pointer"
-                            @click="openModal('view', i.id)" />
-                        <img src="../assets/action_icon_list.png"
-                            class="h-4 w-auto cursor-pointer"
-                            @click="openSQModal('edit', i.id)" />
-                        </span>
-                    </div>
+                    <td class="px-6 py-5 text-center w-auto">
+                        <div class="inline-flex items-center justify-center">
+                            <img
+                                src="../assets/icon_edit.png"
+                                class="h-4 w-auto cursor-pointer opacity-70 hover:opacity-100 transition"
+                                alt=""
+                                role="button"
+                                tabindex="0"
+                                @click="openModal('edit', i.id)"
+                                @keydown.enter="openModal('edit', i.id)"
+                                @keydown.space.prevent="openModal('edit', i.id)"
+                            />
+                            <span class="mx-3 h-4 w-px bg-slate-200"></span>
+                            <img
+                                src="../assets/action_icon_view.png"
+                                class="h-4 w-auto cursor-pointer opacity-70 hover:opacity-100 transition"
+                                alt=""
+                                role="button"
+                                tabindex="0"
+                                @click="openModal('view', i.id)"
+                                @keydown.enter="openModal('view', i.id)"
+                                @keydown.space.prevent="openModal('view', i.id)"
+                            />
+                            <span class="mx-3 h-4 w-px bg-slate-200"></span>
+                            <img
+                                src="../assets/action_icon_list.png"
+                                class="h-4 w-auto cursor-pointer opacity-70 hover:opacity-100 transition"
+                                alt=""
+                                role="button"
+                                tabindex="0"
+                                @click="openSQModal('edit', i.id)"
+                                @keydown.enter="openSQModal('edit', i.id)"
+                                @keydown.space.prevent="openSQModal('edit', i.id)"
+                            />
+                        </div>
                     </td>
                 </tr>
                 
             </tbody>
         </table>
                         
+        </div>
+
+        <div class="px-6 py-4 flex items-center justify-end" v-if="alldata.length > page_limit">
+            <div class="pagination_cmp">
+                <vue-awesome-paginate 
+                :total-items="total_cnt" 
+                :items-per-page="page_limit"
+                v-model="page"
+                @click="getAllData(null,null)">
+                <template #prev-button>
+                    <span>
+                    Prev
+                    </span>
+                </template>
+
+                <template #next-button>
+                    <span>
+                    Next
+                    </span>
+                </template>
+                </vue-awesome-paginate>
+            </div>
         </div>
 
 
@@ -168,11 +227,12 @@ export default{
     },
     data(){
         return{
-            alldata : '',
+            alldata : [],
             page: 1,
             total_cnt: 0,
             total_pages : 0,
             page_limit : 25,
+            isLoading: false,
             show_Modal_Add : false,
             show_Modal_SQ : false,
 
@@ -272,3 +332,30 @@ export default{
 }
 
 </script>
+
+<style scoped>
+.page-anim{
+  animation: pageFadeUp 520ms cubic-bezier(.2,.9,.2,1) both;
+}
+
+.item-anim{
+  opacity: 0;
+  transform: translateY(8px);
+  animation: itemFadeUp 520ms cubic-bezier(.2,.9,.2,1) both;
+  will-change: transform, opacity;
+}
+
+@keyframes pageFadeUp{
+  from{ opacity: 0; transform: translateY(10px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+@keyframes itemFadeUp{
+  from{ opacity: 0; transform: translateY(10px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .page-anim, .item-anim{ animation: none !important; transform: none !important; opacity: 1 !important; }
+}
+</style>

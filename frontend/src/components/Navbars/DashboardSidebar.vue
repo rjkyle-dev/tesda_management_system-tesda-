@@ -16,7 +16,7 @@
       </div>
     </div>
 
-    <div class="flex-1 overflow-y-auto overflow-x-hidden scrollbar py-3 px-2">
+    <div class="sidebar-scroll flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar py-3 px-2">
       <nav class="space-y-1">
         <template v-for="(i, index) in alldata" :key="i.id">
           <p
@@ -57,14 +57,14 @@
                   class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm mt-0.5"
                   @click="changePage(i2, index)"
                 >
-                  <img :src="getImgUrl(i2.um_id.profile_pic)" class="w-7 h-7 rounded-md object-cover shrink-0 bg-slate-800" alt="" />
+                  <img :src="getImgUrl(i2.um_id.profile_pic)" class="w-7 h-7 rounded-md object-cover shrink-0" alt="" />
                   <span v-if="openSidebar" class="truncate">{{ i2.um_id.name }}</span>
                 </button>
               </div>
             </div>
           </div>
 
-          <div v-if="i.um_id && i.um_id.name === 'Reports' && !menuHasAnalytics()" class="mt-1">
+          <!-- <div v-if="i.um_id && i.um_id.name === 'Reports' && !menuHasAnalytics()" class="mt-1">
             <button
               type="button"
               :class="[$route.path === '/analytics' ? parentActiveClass : parentInactiveClass]"
@@ -74,7 +74,7 @@
               <span class="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 text-xs font-bold shrink-0">A</span>
               <span v-if="openSidebar" class="text-sm font-medium">Analytics</span>
             </button>
-          </div>
+          </div> -->
         </template>
       </nav>
     </div>
@@ -211,6 +211,17 @@ export default {
 </script>
 
 <style scoped>
+.sidebar-root {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar-scroll {
+  overscroll-behavior: contain;
+}
+
 .scrollbar::-webkit-scrollbar {
   width: 6px;
 }

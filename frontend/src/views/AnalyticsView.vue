@@ -1,39 +1,151 @@
 <template>
-  <div class="analytics-page p-5 h-full overflow-y-auto">
-    <div class="analytics-hero rounded-xl p-5 mb-4">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
-          <h1 class="text-2xl font-semibold text-white">Descriptive Analytics</h1>
-          <p class="text-white text-opacity-90 text-sm mt-1">
-            Budget utilization and billing submission trends across training centers.
+  <div class="analytics-page p-5 h-full overflow-y-auto page-anim">
+    <div class="analytics-header mb-4">
+      <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="header-mark" aria-hidden="true"></span>
+            <h1 class="text-2xl font-semibold text-slate-900">Descriptive Analytics</h1>
+          </div>
+          <p class="text-slate-500 text-sm mt-1">
+            Statistical overview of scholarship programs and scholar performance across Davao de Oro
           </p>
         </div>
-        <div
-          v-show="$store.state.user.ut_id.description == 'Admin'"
-          class="bg-white bg-opacity-20 rounded-lg px-3 py-2 self-start md:self-auto"
-        >
-          <label class="text-xs text-white text-opacity-90 mr-2">Fiscal year</label>
-          <select v-model="selectedFiscalYear" class="rounded-md text-gray-800 px-2 py-1 text-sm">
+
+        <div v-show="$store.state.user.ut_id.description == 'Admin'" class="year-select-wrap">
+          <div class="year-select-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4">
+              <path
+                d="M7 2v2M17 2v2M4.5 7.5h15M6 5h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+              <path
+                d="M8 11h3M8 15h3M13 11h3M13 15h3"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+          <select v-model="selectedFiscalYear" class="year-select" aria-label="Select year">
             <option v-for="fy in years" :key="fy" :value="fy">
-              {{ fy }}
+              {{ fiscalYearToYearLabel(fy) }}
             </option>
           </select>
         </div>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <div class="metric-card">
-        <p class="metric-label">Training Centers</p>
-        <p class="metric-value">{{ stats.total_tc }}</p>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+      <div class="stat-card stat-card--blue card-anim" :style="{ animationDelay: '40ms' }">
+        <div class="stat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5">
+            <path
+              d="M17 20a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+            />
+            <path
+              d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"
+              stroke="currentColor"
+              stroke-width="1.8"
+            />
+            <path
+              d="M22 20a3.5 3.5 0 0 0-2.5-3.35"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+            />
+            <path
+              d="M18.5 4.65A3.5 3.5 0 0 1 20 8"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+            />
+          </svg>
+        </div>
+        <div class="stat-meta">
+          <span class="stat-badge">+18%</span>
+        </div>
+        <p class="stat-label">Training Centers</p>
+        <p class="stat-value">{{ stats.total_tc }}</p>
       </div>
-      <div class="metric-card">
-        <p class="metric-label">Qualifications</p>
-        <p class="metric-value">{{ stats.total_q }}</p>
+
+      <div class="stat-card stat-card--green card-anim" :style="{ animationDelay: '85ms' }">
+        <div class="stat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5">
+            <path
+              d="M3 17l6-6 4 4 7-9"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M3 7v10h10"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <div class="stat-meta">
+          <span class="stat-badge">+5.3%</span>
+        </div>
+        <p class="stat-label">Avg Budget Utilization</p>
+        <p class="stat-value">{{ avgBURDisplay }}%</p>
       </div>
-      <div class="metric-card">
-        <p class="metric-label">Avg Budget Utilization</p>
-        <p class="metric-value">{{ avgBURDisplay }}%</p>
+
+      <div class="stat-card stat-card--indigo card-anim" :style="{ animationDelay: '130ms' }">
+        <div class="stat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5">
+            <path
+              d="M12 3l9 5-9 5-9-5 9-5Z"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M3 8v8l9 5 9-5V8"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <div class="stat-meta">
+          <span class="stat-badge">+{{ stats.list_tc.length || 0 }}</span>
+        </div>
+        <p class="stat-label">Centers Evaluated</p>
+        <p class="stat-value">{{ stats.list_tc.length || 0 }}</p>
+      </div>
+
+      <div class="stat-card stat-card--orange card-anim" :style="{ animationDelay: '175ms' }">
+        <div class="stat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5">
+            <path
+              d="M12 21s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Z"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M12 10.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"
+              stroke="currentColor"
+              stroke-width="1.8"
+            />
+          </svg>
+        </div>
+        <div class="stat-meta">
+          <span class="stat-badge">100%</span>
+        </div>
+        <p class="stat-label">Qualifications</p>
+        <p class="stat-value">{{ stats.total_q }}</p>
       </div>
     </div>
 
@@ -128,7 +240,8 @@
             <tr
               v-for="(item, index) in trainingCenterTableRowsRanked"
               :key="item.logoKey || item.abbre || index"
-              class="border-b border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors"
+              class="border-b border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors item-anim"
+              :style="{ animationDelay: `${Math.min(index, 24) * 28}ms` }"
               @click="openTrainingCenterModal(item)"
             >
               <td class="px-3 py-2 text-gray-800 font-semibold tabular-nums">
@@ -390,6 +503,13 @@ export default {
     this.getStats();
   },
   methods: {
+    fiscalYearToYearLabel(fy) {
+      const raw = String(fy || '').trim();
+      if (!raw) return '';
+      const parts = raw.split('-').map((p) => p.trim()).filter(Boolean);
+      if (parts.length === 2 && /^\d{4}$/.test(parts[1])) return parts[1];
+      return parts[0] || raw;
+    },
     async getStats() {
       await Promise.allSettled([
         this.getCounts(),
@@ -620,30 +740,161 @@ export default {
 
 <style scoped>
 .analytics-page {
-  background: linear-gradient(180deg, #f5f7ff 0%, #eef8ff 100%);
+  background: linear-gradient(180deg, #f6f9ff 0%, #eff7ff 55%, #f7fbff 100%);
 }
 
-.analytics-hero {
-  background: linear-gradient(120deg, #1e3a8a 0%, #2563eb 45%, #06b6d4 100%);
+.analytics-header {
+  padding: 0.25rem 0.25rem 0;
 }
 
-.metric-card {
-  background: #ffffff;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
+.header-mark {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  background: linear-gradient(145deg, #0ea5e9, #2563eb);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.22);
+  flex: 0 0 auto;
 }
 
-.metric-label {
-  color: #64748b;
-  font-size: 0.8rem;
+.year-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 9999px;
+  background: rgba(226, 232, 240, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
-.metric-value {
-  color: #0f172a;
-  font-size: 1.5rem;
+.year-select-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.75);
+  color: #334155;
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.25);
+  flex: 0 0 auto;
+}
+
+.year-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: 0;
+  outline: none;
+  background: #1d4ed8;
+  color: #fff;
   font-weight: 700;
-  margin-top: 0.2rem;
+  padding: 0.55rem 2.1rem 0.55rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 12px 22px rgba(29, 78, 216, 0.22);
+}
+
+.year-select:focus-visible {
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25), 0 12px 22px rgba(29, 78, 216, 0.22);
+}
+
+.year-select-wrap::after {
+  content: '';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid rgba(255, 255, 255, 0.95);
+  transform: translateY(-35%);
+  pointer-events: none;
+}
+
+.stat-card {
+  position: relative;
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  color: #fff;
+  overflow: hidden;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+  min-height: 104px;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  inset: -30% -20%;
+  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.35), transparent 55%);
+  transform: rotate(-12deg);
+}
+
+.stat-icon {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 0.9rem;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.stat-meta {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  z-index: 1;
+}
+
+.stat-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  font-size: 0.75rem;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+}
+
+.stat-label {
+  position: relative;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.stat-value {
+  position: relative;
+  margin-top: 0.15rem;
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.stat-card--blue {
+  background: linear-gradient(110deg, #0ea5e9 0%, #2563eb 60%, #1d4ed8 100%);
+}
+
+.stat-card--green {
+  background: linear-gradient(110deg, #22c55e 0%, #10b981 55%, #059669 100%);
+}
+
+.stat-card--indigo {
+  background: linear-gradient(110deg, #6366f1 0%, #3b82f6 60%, #2563eb 100%);
+}
+
+.stat-card--orange {
+  background: linear-gradient(110deg, #f59e0b 0%, #f97316 55%, #ea580c 100%);
 }
 
 .status-badge {
@@ -762,5 +1013,44 @@ export default {
 .rank-pill--bronze {
   background: linear-gradient(145deg, #fdba74, #ea580c);
   color: #431407;
+}
+</style>
+
+<style scoped>
+.page-anim{
+  animation: pageFadeUp 520ms cubic-bezier(.2,.9,.2,1) both;
+}
+
+.card-anim{
+  opacity: 0;
+  transform: translateY(10px);
+  animation: cardFadeUp 560ms cubic-bezier(.2,.9,.2,1) both;
+  will-change: transform, opacity;
+}
+
+.item-anim{
+  opacity: 0;
+  transform: translateY(8px);
+  animation: itemFadeUp 520ms cubic-bezier(.2,.9,.2,1) both;
+  will-change: transform, opacity;
+}
+
+@keyframes pageFadeUp{
+  from{ opacity: 0; transform: translateY(10px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardFadeUp{
+  from{ opacity: 0; transform: translateY(14px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+@keyframes itemFadeUp{
+  from{ opacity: 0; transform: translateY(10px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .page-anim, .card-anim, .item-anim{ animation: none !important; transform: none !important; opacity: 1 !important; }
 }
 </style>

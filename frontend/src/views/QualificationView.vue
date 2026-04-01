@@ -1,134 +1,115 @@
 <template>
-    <div class="flex-auto flex flex-col">
-
-        <div class="bg-white border-b py-3">
-        <div class="flex items-center w-full gap-3">
-        <div class="flex-none sm:flex-none">
-            <button class="bg-primary-600 hover:bg-primary-500 text-white px-4 py-2 mx-4 my-2 rounded-lg duration-300" @click="openModal('add',0)">
-                Add Qualification +
-            </button>
-        </div>
-        <div class="flex-none sm:flex-auto">
-            <input type="text" class="w-full rounded-md border-gray-300 text-sm focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 px-3 py-2" placeholder="Search qualification.." @input="getAllData($event.target.value, 'search')">
-        </div>
-        <div class="flex-auto sm:flex-none">
-            <div class="pagination_cmp px-3" v-if="alldata.length > page_limit">
-                <vue-awesome-paginate 
-                :total-items="total_cnt" 
-                :items-per-page="page_limit"
-                v-model="page"
-                @click="getAllData(null,null)">
-                <template #prev-button>
-                    <span>
-                    <!-- <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="black"
-                        width="8"
-                        height="8"
-                        viewBox="0 0 24 24"
-                    >
-                        <path d="M8.122 24l-4.122-4 8-8-8-8 4.122-4 11.878 12z" />
-                    </svg> -->
-                    Prev
-                    </span>
-                </template>
-
-                <template #next-button>
-                    <span>
-                    Next
-                    <!-- <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="black"
-                        width="8"
-                        height="8"
-                        viewBox="0 0 24 24"
-                    >
-                        <path d="M8.122 24l-4.122-4 8-8-8-8 4.122-4 11.878 12z" />
-                    </svg> -->
-                    </span>
-                </template>
-                </vue-awesome-paginate>
-            </div>
-        </div>
-    </div>
+  <div class="flex-auto flex flex-col p-5 page-anim">
+    <div class="flex items-start justify-between gap-4 mb-4">
+      <div class="min-w-0">
+        <h1 class="text-2xl font-semibold text-slate-900">Qualifications</h1>
+      </div>
+      <button
+        type="button"
+        class="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-xl shadow-sm duration-200 whitespace-nowrap"
+        @click="openModal('add', 0)"
+      >
+        <span class="text-lg leading-none">+</span>
+        <span class="font-semibold text-sm">Add Qualification</span>
+      </button>
     </div>
 
-        <div class="bg-white m-4 p-4 rounded-md shadow-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+      <div class="relative w-full sm:max-w-md">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4">
+            <path
+              d="M21 21l-4.3-4.3m1.3-5.2a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+            />
+          </svg>
+        </span>
+        <input
+          type="text"
+          class="w-full rounded-2xl border border-slate-200 bg-white text-sm px-10 py-2.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-300"
+          placeholder="Search qualification..."
+          @input="getAllData($event.target.value, 'search')"
+        >
+      </div>
 
+      <div class="pagination_cmp sm:px-3 self-end sm:self-auto" v-if="alldata.length > page_limit">
+        <vue-awesome-paginate
+          :total-items="total_cnt"
+          :items-per-page="page_limit"
+          v-model="page"
+          @click="getAllData(null, null)"
+        >
+          <template #prev-button>
+            <span>Prev</span>
+          </template>
+          <template #next-button>
+            <span>Next</span>
+          </template>
+        </vue-awesome-paginate>
+      </div>
+    </div>
 
-        <div class="relative scrollbar sm:rounded-lg border">
-
-        <table class="w-full text-sm text-left text-gray-500">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                <tr>
-                    <th scope="col" class="px-6 py-3 w-auto text-left">
-                    Qualification Title
-                    </th>
-                    <th scope="col" class="px-6 py-3 w-auto text-left">
-                    Category
-                    </th>
-                    <th scope="col" class="px-6 py-3 w-auto text-center">
-                    Training Hours
-                    </th>
-                    <th scope="col" class="px-6 py-3 w-auto text-center">
-                    Training Days
-                    </th>
-                    <th scope="col" class="py-3 text-center w-48">
-                    Date & Time added
-                    </th>
-                    <!-- <th scope="col" class="px-6 py-3 text-center">
-                    Approval Status
-                    </th> -->
-                    <!-- <th scope="col" class="px-6 py-3 text-center w-10">
-                    Released
-                    </th> -->
-                    <th scope="col" class="px-6 py-3 text-center w-28">
-                    Actions
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-
-            <tr v-if="alldata.length == 0">
-                <td colspan="6" class="py-8 text-center text-gray-500 text-sm">
-                There are no files yet.
-                </td>
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="text-[11px] text-slate-500 uppercase bg-slate-50">
+            <tr>
+              <th scope="col" class="px-6 py-4 text-left tracking-wider">Qualification Title</th>
+              <th scope="col" class="px-6 py-4 text-left tracking-wider">Category</th>
+              <th scope="col" class="px-6 py-4 text-center tracking-wider">Hours</th>
+              <th scope="col" class="px-6 py-4 text-center tracking-wider">Days</th>
+              <th scope="col" class="px-6 py-4 text-left tracking-wider whitespace-nowrap">Date Added</th>
+              <th scope="col" class="px-6 py-4 text-center tracking-wider w-28">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr v-if="alldata.length === 0">
+              <td colspan="6" class="py-10 text-center text-slate-500 text-sm">
+                No qualifications found.
+              </td>
             </tr>
 
-                <tr v-for="i in alldata" v-bind:key="i.id" class="border-b hover:bg-gray-100 transition">
-                    <td class="py-4 px-6 text-left w-auto">
-                    {{checkIfEmpty(i.description)}}
-                    </td>
-                    <td class="py-4 px-6 text-left w-auto">
-                    {{i.category_id ? i.category_id.description : '-'}}
-                    </td>
-                    <td class="py-4 px-2 text-center w-auto">
-                    {{checkIfEmpty(i.hrs)}}
-                    </td>
-                    <td class="py-4 px-2 text-center w-auto">
-                    {{checkIfEmpty(i.days)}}
-                    </td>
-                    <td class="px-2 py-4 text-center w-48">
-                    {{getDateTimeFormat(i.datetime_added)}}
-                    </td>
-                    <td class="px-6 py-4 text-center w-auto">
-                    <span class="flex items-center justify-center space-x-2">
-                         <img src="../assets/icon_edit.png" class="h-4 w-auto cursor-pointer" @click="openModal('edit',i.id)">
-                        <!-- <img src="../assets/action_icon_delete.png" class="h-4 w-auto cursor-pointer" @click="showSubModal(i,'trash record')">  -->
-                    </span>
-                    </td>
-                </tr>
-                
-            </tbody>
+            <tr
+              v-for="(i, idx) in alldata"
+              :key="i.id"
+              class="hover:bg-slate-50 transition-colors item-anim"
+              :style="{ animationDelay: `${Math.min(idx, 20) * 35}ms` }"
+            >
+              <td class="px-6 py-5 text-slate-800 font-medium">
+                {{ checkIfEmpty(i.description) }}
+              </td>
+              <td class="px-6 py-5 text-slate-600">
+                {{ i.category_id ? i.category_id.description : '-' }}
+              </td>
+              <td class="px-6 py-5 text-center text-slate-700 font-semibold tabular-nums">
+                {{ checkIfEmpty(i.hrs) }}
+              </td>
+              <td class="px-6 py-5 text-center text-slate-700 font-semibold tabular-nums">
+                {{ checkIfEmpty(i.days) }}
+              </td>
+              <td class="px-6 py-5 text-slate-600 whitespace-nowrap">
+                {{ getDateTimeFormat(i.datetime_added) }}
+              </td>
+              <td class="px-6 py-5">
+                <div class="flex items-center justify-center">
+                  <button
+                    class="p-2 rounded-xl hover:bg-slate-100 active:bg-slate-200 duration-150"
+                    type="button"
+                    @click="openModal('edit', i.id)"
+                    aria-label="Edit"
+                  >
+                    <img src="../assets/icon_edit.png" class="h-4 w-auto" alt="">
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
         </table>
-                        
-        </div>
-
-
-
-</div>
-        
+      </div>
     </div>
+  </div>
 
     <AddQualification v-if="show_Modal_Add" @close-modal="show_Modal_Add = false" :refreshData="refreshData" :showNotification="showNotification" :item_data="item_data"/>
   
@@ -152,7 +133,7 @@ export default{
     },
     data(){
         return{
-            alldata : '',
+            alldata : [],
             page: 1,
             total_cnt: 0,
             total_pages : 0,
@@ -209,3 +190,30 @@ export default{
 }
 
 </script>
+
+<style scoped>
+.page-anim{
+  animation: pageFadeUp 520ms cubic-bezier(.2,.9,.2,1) both;
+}
+
+.item-anim{
+  opacity: 0;
+  transform: translateY(8px);
+  animation: itemFadeUp 520ms cubic-bezier(.2,.9,.2,1) both;
+  will-change: transform, opacity;
+}
+
+@keyframes pageFadeUp{
+  from{ opacity: 0; transform: translateY(10px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+@keyframes itemFadeUp{
+  from{ opacity: 0; transform: translateY(10px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .page-anim, .item-anim{ animation: none !important; transform: none !important; opacity: 1 !important; }
+}
+</style>
