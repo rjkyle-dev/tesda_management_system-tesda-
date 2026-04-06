@@ -31,7 +31,7 @@
           </div>
           <select v-model="selectedFiscalYear" class="year-select" aria-label="Select year">
             <option v-for="fy in years" :key="fy" :value="fy">
-              {{ fiscalYearToYearLabel(fy) }}
+              {{ fy }}
             </option>
           </select>
         </div>
