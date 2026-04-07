@@ -11,7 +11,7 @@
       <header class="shrink-0 sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
         <DashboardNavbar />
       </header>
-      <main class="flex-1 overflow-y-auto bg-slate-50">
+      <main class="flex-1 min-w-0 overflow-y-auto overflow-x-hidden bg-slate-50">
         <router-view :showNotification="showNotification" />
       </main>
     </div>

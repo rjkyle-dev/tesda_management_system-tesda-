@@ -67,9 +67,6 @@
             />
           </svg>
         </div>
-        <div class="stat-meta">
-          <span class="stat-badge">+18%</span>
-        </div>
         <p class="stat-label">Training Centers</p>
         <p class="stat-value">{{ stats.total_tc }}</p>
       </div>
@@ -93,9 +90,6 @@
             />
           </svg>
         </div>
-        <div class="stat-meta">
-          <span class="stat-badge">+5.3%</span>
-        </div>
         <p class="stat-label">Avg Budget Utilization</p>
         <p class="stat-value">{{ avgBURDisplay }}%</p>
       </div>
@@ -117,9 +111,6 @@
             />
           </svg>
         </div>
-        <div class="stat-meta">
-          <span class="stat-badge">+{{ stats.list_tc.length || 0 }}</span>
-        </div>
         <p class="stat-label">Centers Evaluated</p>
         <p class="stat-value">{{ stats.list_tc.length || 0 }}</p>
       </div>
@@ -140,9 +131,6 @@
               stroke-width="1.8"
             />
           </svg>
-        </div>
-        <div class="stat-meta">
-          <span class="stat-badge">100%</span>
         </div>
         <p class="stat-label">Qualifications</p>
         <p class="stat-value">{{ stats.total_q }}</p>
@@ -229,11 +217,11 @@
             <tr class="bg-gray-50 text-gray-600">
               <th class="px-3 py-2 text-left w-14">Rank</th>
               <th class="px-3 py-2 text-left">Training Center</th>
-              <th class="px-3 py-2 text-center">BUR (%)</th>
-              <th class="px-3 py-2 text-center">Billing Compliance (%)</th>
-              <th class="px-3 py-2 text-center">Enrollment Rate (%)</th>
-              <th class="px-3 py-2 text-center">Completion Rate (%)</th>
-              <th class="px-3 py-2 text-center">Assessment Rate (%)</th>
+              <th class="px-3 py-2 text-center">BUR (30%)</th>
+              <th class="px-3 py-2 text-center">Billing Compliance (25%)</th>
+              <th class="px-3 py-2 text-center">Enrollment Rate (10%)</th>
+              <th class="px-3 py-2 text-center">Completion Rate (20%)</th>
+              <th class="px-3 py-2 text-center">Assessment Rate (15%)</th>
               <th class="px-3 py-2 text-center">Weighted Score</th>
             </tr>
           </thead>
@@ -272,12 +260,15 @@
       </div>
     </div>
 
-    <div
-      v-if="isTrainingCenterModalOpen"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 backdrop-blur-[2px]"
-      @click.self="closeTrainingCenterModal"
-    >
-      <div class="w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+    <Teleport to="body">
+      <div
+        v-if="isTrainingCenterModalOpen"
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 backdrop-blur-[2px]"
+        role="dialog"
+        aria-modal="true"
+        @click.self="closeTrainingCenterModal"
+      >
+        <div class="w-full max-w-5xl max-h-[calc(100dvh-2rem)] overflow-y-auto bg-white rounded-2xl shadow-2xl overflow-x-hidden">
         <div class="modal-header px-5 py-4 flex items-start justify-between gap-3">
           <div class="flex items-start gap-4 min-w-0">
             <div class="relative shrink-0">
@@ -310,7 +301,15 @@
 
         <div class="p-5">
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            <div class="lg:col-span-7 modal-wps">
+            <button
+              type="button"
+              class="lg:col-span-7 modal-wps modal-wps--interactive text-left w-full"
+              :class="{ 'modal-wps--active': selectedMetricInsightKey === 'wps' }"
+              :disabled="metricPercentNumber('wps') == null"
+              :aria-pressed="selectedMetricInsightKey === 'wps'"
+              aria-label="Show insight for Weighted Performance Score"
+              @click="toggleMetricInsight('wps')"
+            >
               <div class="modal-wps-inner">
                 <p class="modal-wps-value tabular-nums">
                   {{ selectedTrainingCenter ? (numericWpsForRank(selectedTrainingCenter.WPS) * 100).toFixed(2) : '0.00' }}
@@ -326,28 +325,74 @@
                   {{ selectedInsights?.wps || selectedInsights?.bur || selectedInsights?.bsc || '—' }}
                 </p>
               </div>
-            </div>
+            </button>
 
-            <div class="lg:col-span-5 grid grid-cols-2 gap-3">
-              <div class="modal-mini">
-                <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatBurPercent(selectedTrainingCenter.BUR) : '—' }}</p>
-                <p class="modal-mini-label">Budget Utilization Rate</p>
+            <div class="lg:col-span-5 flex flex-col gap-3">
+              <div class="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  class="modal-mini modal-mini--interactive modal-mini--prominent text-left min-w-0"
+                  :class="{ 'modal-mini--active': selectedMetricInsightKey === 'bur' }"
+                  :disabled="metricPercentNumber('bur') == null"
+                  :aria-pressed="selectedMetricInsightKey === 'bur'"
+                  aria-label="Show insight for Budget Utilization Rate"
+                  @click="toggleMetricInsight('bur')"
+                >
+                  <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatBurPercent(selectedTrainingCenter.BUR) : '—' }}</p>
+                  <p class="modal-mini-label">Budget Utilization Rate</p>
+                </button>
+
+                <button
+                  type="button"
+                  class="modal-mini modal-mini--interactive modal-mini--prominent text-left min-w-0"
+                  :class="{ 'modal-mini--active': selectedMetricInsightKey === 'bsc' }"
+                  :disabled="metricPercentNumber('bsc') == null"
+                  :aria-pressed="selectedMetricInsightKey === 'bsc'"
+                  aria-label="Show insight for Billing Compliance"
+                  @click="toggleMetricInsight('bsc')"
+                >
+                  <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatBscPercent(selectedTrainingCenter.BSC) : '—' }}</p>
+                  <p class="modal-mini-label">Billing Compliance</p>
+                </button>
               </div>
-              <div class="modal-mini">
-                <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatBscPercent(selectedTrainingCenter.BSC) : '—' }}</p>
-                <p class="modal-mini-label">Billing Compliance</p>
-              </div>
-              <div class="modal-mini">
-                <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatOptionalPercent(selectedTrainingCenter.ENR) : '—' }}</p>
-                <p class="modal-mini-label">Enrollment Rate</p>
-              </div>
-              <div class="modal-mini">
-                <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatOptionalPercent(selectedTrainingCenter.CRR) : '—' }}</p>
-                <p class="modal-mini-label">Completion Rate</p>
-              </div>
-              <div class="modal-mini col-span-2">
-                <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatOptionalPercent(selectedTrainingCenter.ASR) : '—' }}</p>
-                <p class="modal-mini-label">Assessment Rate</p>
+
+              <div class="grid grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  class="modal-mini modal-mini--interactive text-left min-w-0"
+                  :class="{ 'modal-mini--active': selectedMetricInsightKey === 'enr' }"
+                  :disabled="metricPercentNumber('enr') == null"
+                  :aria-pressed="selectedMetricInsightKey === 'enr'"
+                  aria-label="Show insight for Enrollment Rate"
+                  @click="toggleMetricInsight('enr')"
+                >
+                  <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatOptionalPercent(selectedTrainingCenter.ENR) : '—' }}</p>
+                  <p class="modal-mini-label">Enrollment Rate</p>
+                </button>
+                <button
+                  type="button"
+                  class="modal-mini modal-mini--interactive text-left min-w-0"
+                  :class="{ 'modal-mini--active': selectedMetricInsightKey === 'crr' }"
+                  :disabled="metricPercentNumber('crr') == null"
+                  :aria-pressed="selectedMetricInsightKey === 'crr'"
+                  aria-label="Show insight for Completion Rate"
+                  @click="toggleMetricInsight('crr')"
+                >
+                  <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatOptionalPercent(selectedTrainingCenter.CRR) : '—' }}</p>
+                  <p class="modal-mini-label">Completion Rate</p>
+                </button>
+                <button
+                  type="button"
+                  class="modal-mini modal-mini--interactive text-left min-w-0"
+                  :class="{ 'modal-mini--active': selectedMetricInsightKey === 'asr' }"
+                  :disabled="metricPercentNumber('asr') == null"
+                  :aria-pressed="selectedMetricInsightKey === 'asr'"
+                  aria-label="Show insight for Assessment Rate"
+                  @click="toggleMetricInsight('asr')"
+                >
+                  <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatOptionalPercent(selectedTrainingCenter.ASR) : '—' }}</p>
+                  <p class="modal-mini-label">Assessment Rate</p>
+                </button>
               </div>
             </div>
           </div>
@@ -410,72 +455,197 @@
             </div>
             <div v-if="modalStatsLoading" class="px-4 py-3 text-xs text-slate-500 border-t border-slate-200">Loading summary…</div>
           </div>
+        </div>
+      </div>
+      </div>
+    </Teleport>
 
-          <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div class="insight-card">
-              <p class="insight-title">Budget Utilization Insight</p>
-              <p v-if="loadingInsights" class="insight-description">Loading insight...</p>
-              <p v-else class="insight-description">{{ selectedInsights.bur || 'No insight description found for this score.' }}</p>
+    <Teleport to="body">
+      <div
+        v-if="selectedMetricInsightKey && metricInsightPanel"
+        class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/55 backdrop-blur-[1px]"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="metric-insight-title"
+        @click.self="closeMetricInsightModal"
+      >
+        <div class="metric-insight-dialog w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+          <div class="flex items-start justify-between gap-3 px-5 py-4 border-b border-slate-100 bg-sky-50">
+            <div class="min-w-0">
+              <p id="metric-insight-title" class="text-sm font-semibold text-slate-900">
+                {{ metricInsightPanel.metricLabel }}
+              </p>
+              <p class="text-xs text-slate-500 mt-1">
+                <span>{{ metricInsightPanel.rangeLabel }}</span>
+                <span class="tabular-nums text-slate-600"> · {{ metricInsightPanel.percentDisplay }}</span>
+              </p>
             </div>
-
-            <div class="insight-card">
-              <p class="insight-title">Billing Submission Insight</p>
-              <p v-if="loadingInsights" class="insight-description">Loading insight...</p>
-              <p v-else class="insight-description">{{ selectedInsights.bsc || 'No insight description found for this score.' }}</p>
-            </div>
-          </div> -->
-
-          <div class="mt-4 insight-card">
-            <div class="flex items-center justify-between gap-2 mb-2">
-              <div>
-                <p class="insight-title mb-0">Insights for this training center</p>
-                <p class="text-xs text-slate-500 mt-1">
-                  Rows from <code class="bg-slate-100 px-1 rounded">insights</code> matched to this center’s scores (Budget Utilization for Training Centers &amp; Billing Submission Compliance).
-                </p>
-              </div>
-              <span v-if="loadingInsightsTable" class="text-xs text-slate-500 shrink-0">Loading…</span>
-            </div>
-            <p v-if="insightsTableError" class="text-xs text-red-600 mb-2">{{ insightsTableError }}</p>
-            <div class="overflow-x-auto max-h-72">
-              <table class="min-w-full text-xs">
-                <thead>
-                  <tr class="bg-slate-100 text-slate-700">
-                    <th class="px-2 py-2 text-left">ID</th>
-                    <th class="px-2 py-2 text-left">Report Name</th>
-                    <th class="px-2 py-2 text-left">From Score</th>
-                    <th class="px-2 py-2 text-left">To Score</th>
-                    <th class="px-2 py-2 text-left">Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="(insight, idx) in modalInsightRows"
-                    :key="insight.id != null ? insight.id : 'ins-' + idx"
-                    class="border-b border-slate-100"
-                  >
-                    <td class="px-2 py-2 whitespace-nowrap">{{ insight.id }}</td>
-                    <td class="px-2 py-2">{{ insight.report_name }}</td>
-                    <td class="px-2 py-2 whitespace-nowrap">{{ insight.from_score }}</td>
-                    <td class="px-2 py-2 whitespace-nowrap">{{ insight.to_score }}</td>
-                    <td class="px-2 py-2">{{ insight.description }}</td>
-                  </tr>
-                  <tr v-if="!loadingInsightsTable && !modalInsightRows.length">
-                    <td colspan="5" class="px-2 py-4 text-center text-slate-500">
-                      No matching insight rows for this center’s current metrics.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <button
+              type="button"
+              class="shrink-0 text-slate-400 hover:text-slate-700 text-2xl leading-none px-1 rounded-lg hover:bg-sky-100/80"
+              aria-label="Close insight"
+              @click="closeMetricInsightModal"
+            >
+              &times;
+            </button>
+          </div>
+          <div v-if="metricInsightPanel.rating" class="px-5 py-3 border-b border-slate-100 bg-white">
+            <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Descriptive rating</p>
+            <p class="text-sm font-semibold text-slate-900 mt-0.5">{{ metricInsightPanel.rating }}</p>
+          </div>
+          <div class="px-5 py-4 text-sm text-slate-700 leading-relaxed max-h-[min(60vh,28rem)] overflow-y-auto">
+            <p v-if="metricInsightPanel.rating" class="text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-2">Strategic insight</p>
+            {{ metricInsightPanel.text }}
           </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+
+/** Hardcoded descriptive insights by score band (BUR, BSC, ENR, CRR, ASR, WPS). */
+const METRIC_RANGE_INSIGHTS = {
+  bur: {
+    label: 'Budget Utilization Rate',
+    tiers: [
+      {
+        rangeLabel: '100% – 90%',
+        text: 'Excellent: Demonstrates high fiscal discipline. The program is fully utilizing resources as planned, minimizing the risk of budget "slashing" in the next fiscal cycle.',
+      },
+      {
+        rangeLabel: '89% – 80%',
+        text: 'Satisfactory: Good utilization, though minor delays in procurement or liquidation may exist. There is a slight risk of under-utilization if not monitored.',
+      },
+      {
+        rangeLabel: '79% – 70%',
+        text: 'Needs Improvement: Indicates bottlenecks in fund release or implementation. Suggests the program is falling behind schedule, risking a return of funds.',
+      },
+      {
+        rangeLabel: 'Below 70%',
+        text: 'Poor: Significant underspending. Indicates major operational hurdles, poor planning, or potential program irrelevance. Immediate intervention required.',
+      },
+    ],
+  },
+  bsc: {
+    label: 'Billing Compliance',
+    tiers: [
+      {
+        rangeLabel: '100% – 90%',
+        text: 'Highly Compliant: Administrative processes are seamless. Documentation is accurate and timely, ensuring zero friction with auditing bodies.',
+      },
+      {
+        rangeLabel: '89% – 80%',
+        text: 'Compliant: Mostly punctual, though occasional lapses in documentation occur. Systems are stable but could benefit from better automation or tracking.',
+      },
+      {
+        rangeLabel: '79% – 70%',
+        text: 'Lax Compliance: Frequent late submissions. This creates a "bottleneck" effect for other departments and risks audit findings or penalties.',
+      },
+      {
+        rangeLabel: 'Below 70%',
+        text: 'Non-Compliant: Critical failure in reporting. Suggests a lack of accountability or severe understaffing in administrative roles.',
+      },
+    ],
+  },
+  enr: {
+    label: 'Enrollment Rate',
+    tiers: [
+      {
+        rangeLabel: '100% – 90%',
+        text: 'Full Capacity: Marketing and recruitment are working perfectly. Resources (slots) are being fully maximized, resulting in the lowest "cost-per-head" possible.',
+      },
+      {
+        rangeLabel: '89% – 80%',
+        text: 'Optimal: Good turnout. Most slots are filled, though there is a small margin of wasted capacity that could have been utilized.',
+      },
+      {
+        rangeLabel: '79% – 70%',
+        text: 'Under-enrolled: Indicates low demand or poor awareness. The program is operating with excess capacity, leading to inefficient use of fixed overhead costs.',
+      },
+      {
+        rangeLabel: 'Below 70%',
+        text: 'Critically Under-enrolled: The program is at risk of being defunded. Suggests the training may no longer be relevant to the target audience or recruitment has failed.',
+      },
+    ],
+  },
+  crr: {
+    label: 'Completion Rate',
+    tiers: [
+      {
+        rangeLabel: '100% – 90%',
+        text: 'High Engagement: Exceptional student/trainee retention. Suggests that the curriculum is engaging and the support systems for participants are highly effective.',
+      },
+      {
+        rangeLabel: '89% – 80%',
+        text: 'Standard: Healthy retention levels. Most participants finish the course, with dropouts likely due to external personal factors rather than program flaws.',
+      },
+      {
+        rangeLabel: '79% – 70%',
+        text: 'Moderate Attrition: Significant numbers are leaving before the end. May indicate that the program is too difficult, too long, or lacks immediate value for the participant.',
+      },
+      {
+        rangeLabel: 'Below 70%',
+        text: 'High Attrition: Major red flag. The program is failing to keep participants engaged. Requires a review of teaching methods or participant selection criteria.',
+      },
+    ],
+  },
+  asr: {
+    label: 'Assessment Rate',
+    tiers: [
+      {
+        rangeLabel: '100% – 90%',
+        text: 'Mastery Achieved: The training is highly effective. Participants are meeting or exceeding the required standards, proving the program’s quality.',
+      },
+      {
+        rangeLabel: '89% – 80%',
+        text: 'Competent: A solid majority are passing. The instruction is effective, though there may be room to refine the assessment or the depth of instruction.',
+      },
+      {
+        rangeLabel: '79% – 70%',
+        text: 'Marginal: A concerning portion of participants are failing to grasp the material. May indicate a gap between the curriculum level and the participants\' prior knowledge.',
+      },
+      {
+        rangeLabel: 'Below 70%',
+        text: 'Substandard: Indicates a failure in the learning process. Either the assessment is too disconnected from the material, or the instruction is not meeting the required standard.',
+      },
+    ],
+  },
+  wps: {
+    label: 'Weighted Performance Score',
+    tiers: [
+      {
+        rangeLabel: '100 – 90',
+        rating: 'Outstanding',
+        text: 'The center demonstrates exceptional fiscal discipline and high training quality. Most indicators are near-optimal, showing that funds are maximized and trainees are successfully transitioning from enrollment to competency certification.',
+      },
+      {
+        rangeLabel: '89 – 80',
+        rating: 'Very Satisfactory',
+        text: 'The center is highly reliable. It maintains strong administrative compliance and solid training outcomes. There may be minor gaps in resource maximization (e.g., slightly lower enrollment efficiency), but the core mission of "skills acquisition" is being met effectively.',
+      },
+      {
+        rangeLabel: '79 – 70',
+        rating: 'Satisfactory',
+        text: 'Performance is at a functional baseline. While the center meets basic requirements, there are likely inconsistencies in either budget utilization or timely billing. Training outcomes are acceptable, but there is noticeable room for improvement in trainee retention or pass rates.',
+      },
+      {
+        rangeLabel: 'Below 70',
+        rating: 'Needs Improvement',
+        text: 'The center is underperforming in critical areas. A score in this range often indicates under-utilized government funds or significant administrative delays (Compliance). It suggests a need for a tactical review of recruitment strategies or training delivery methods to prevent resource waste.',
+      },
+    ],
+  },
+};
+
+function tierIndexForPercent(pct) {
+  if (pct >= 90) return 0;
+  if (pct >= 80) return 1;
+  if (pct >= 70) return 2;
+  return 3;
+}
 
 export default {
   data() {
@@ -495,15 +665,29 @@ export default {
         bsc: '',
         wps: '',
       },
-      loadingInsights: false,
-      loadingInsightsTable: false,
-      insightsTableError: null,
-      modalInsightRows: [],
       modalStatsLoading: false,
       modalStats: null,
+      selectedMetricInsightKey: null,
     };
   },
   computed: {
+    metricInsightPanel() {
+      const key = this.selectedMetricInsightKey;
+      if (!key || !this.selectedTrainingCenter) return null;
+      const cfg = METRIC_RANGE_INSIGHTS[key];
+      if (!cfg) return null;
+      const pct = this.metricPercentNumber(key);
+      if (pct == null || !Number.isFinite(pct)) return null;
+      const tier = cfg.tiers[tierIndexForPercent(pct)];
+      if (!tier) return null;
+      return {
+        metricLabel: cfg.label,
+        rangeLabel: tier.rangeLabel,
+        rating: tier.rating ?? null,
+        text: tier.text,
+        percentDisplay: `${pct.toFixed(2)}%`,
+      };
+    },
     avgBUR() {
       if (!this.stats.list_tc.length) return 0;
       const total = this.stats.list_tc.reduce((sum, item) => sum + Number(item.BUR || 0), 0);
@@ -672,12 +856,54 @@ export default {
     normalizeName(value) {
       return String(value || '').trim().toLowerCase();
     },
+    metricPercentNumber(key) {
+      const tc = this.selectedTrainingCenter;
+      if (!tc) return null;
+      if (key === 'bur') {
+        const n = Number(tc.BUR);
+        if (!Number.isFinite(n)) return null;
+        return this.dashboardRatePercent(n);
+      }
+      if (key === 'bsc') {
+        const n = Number(tc.BSC);
+        if (!Number.isFinite(n)) return null;
+        return this.dashboardRatePercent(n);
+      }
+      if (key === 'enr') {
+        const v = this.firstNumber(tc, ['ENR', 'enrollment_rate', 'enrollmentRate', 'enrollment']);
+        if (v == null) return null;
+        return this.dashboardRatePercent(v);
+      }
+      if (key === 'crr') {
+        const v = this.firstNumber(tc, ['CRR', 'completion_rate', 'completionRate', 'completion']);
+        if (v == null) return null;
+        return this.dashboardRatePercent(v);
+      }
+      if (key === 'asr') {
+        const v = this.firstNumber(tc, ['ASR', 'assessment_rate', 'assessmentRate', 'assessment']);
+        if (v == null) return null;
+        return this.dashboardRatePercent(v);
+      }
+      if (key === 'wps') {
+        const n = Number(tc.WPS ?? 0);
+        if (!Number.isFinite(n)) return null;
+        return this.numericWpsForRank(n) * 100;
+      }
+      return null;
+    },
+    toggleMetricInsight(key) {
+      const p = this.metricPercentNumber(key);
+      if (p == null || !Number.isFinite(p)) return;
+      this.selectedMetricInsightKey = this.selectedMetricInsightKey === key ? null : key;
+    },
+    closeMetricInsightModal() {
+      this.selectedMetricInsightKey = null;
+    },
     async openTrainingCenterModal(item) {
       this.selectedTrainingCenter = item;
       this.isTrainingCenterModalOpen = true;
       document.body.style.overflow = 'hidden';
-      this.insightsTableError = null;
-      this.modalInsightRows = [];
+      this.selectedMetricInsightKey = null;
       this.modalStats = null;
       await this.loadInsightsForTrainingCenter(item);
       await this.loadTrainingCenterStats(item);
@@ -685,11 +911,9 @@ export default {
     closeTrainingCenterModal() {
       this.isTrainingCenterModalOpen = false;
       document.body.style.overflow = '';
+      this.selectedMetricInsightKey = null;
       this.selectedTrainingCenter = null;
       this.selectedInsights = { bur: '', bsc: '', wps: '' };
-      this.modalInsightRows = [];
-      this.loadingInsights = false;
-      this.loadingInsightsTable = false;
       this.modalStatsLoading = false;
       this.modalStats = null;
     },
@@ -715,11 +939,7 @@ export default {
       }
     },
     async loadInsightsForTrainingCenter(item) {
-      this.loadingInsights = true;
-      this.loadingInsightsTable = true;
-      this.insightsTableError = null;
       this.selectedInsights = { bur: '', bsc: '', wps: '' };
-      this.modalInsightRows = [];
 
       const burScore = this.toInsightScore(item.BUR);
       const bscScore = this.toInsightScore(item.BSC);
@@ -738,21 +958,8 @@ export default {
         this.selectedInsights.bur = burRow?.description ?? '';
         this.selectedInsights.bsc = bscRow?.description ?? '';
         this.selectedInsights.wps = wpsRow?.description ?? '';
-
-        const rows = [burRow, bscRow, wpsRow].filter(Boolean);
-        const seen = new Set();
-        this.modalInsightRows = rows.filter((r) => {
-          const key = r.id != null ? `id:${r.id}` : `${r.report_name}|${r.from_score}|${r.to_score}`;
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
       } catch (error) {
         console.error('Failed to load insights for training center:', error);
-        this.insightsTableError = 'Could not load insight records. Check API /insights/find_description/…';
-      } finally {
-        this.loadingInsights = false;
-        this.loadingInsightsTable = false;
       }
     },
     async fetchInsightRecord(score, reportName) {
@@ -1002,26 +1209,6 @@ export default {
   color: #fff;
 }
 
-.stat-meta {
-  position: absolute;
-  right: 14px;
-  top: 14px;
-  z-index: 1;
-}
-
-.stat-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.2rem 0.55rem;
-  border-radius: 9999px;
-  background: rgba(15, 23, 42, 0.2);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
-  font-size: 0.75rem;
-  font-weight: 700;
-  backdrop-filter: blur(10px);
-}
-
 .stat-label {
   position: relative;
   margin-top: 0.75rem;
@@ -1096,6 +1283,34 @@ export default {
   position: relative;
 }
 
+button.modal-wps {
+  appearance: none;
+  font: inherit;
+  font-family: inherit;
+  margin: 0;
+  border: none;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+button.modal-wps:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button.modal-wps.modal-wps--interactive:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.45), 0 18px 40px rgba(15, 23, 42, 0.18);
+}
+
+button.modal-wps.modal-wps--interactive:hover:not(:disabled) {
+  filter: brightness(1.03);
+}
+
+.modal-wps.modal-wps--active {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35), 0 18px 40px rgba(15, 23, 42, 0.22);
+}
+
 .modal-wps-value {
   font-size: 3.25rem;
   font-weight: 800;
@@ -1130,6 +1345,55 @@ export default {
   color: #0f172a;
 }
 
+.modal-mini--prominent {
+  padding: 1rem 1.05rem;
+}
+
+.modal-mini--prominent .modal-mini-value {
+  font-size: 2.5rem;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.modal-mini--prominent .modal-mini-label {
+  font-size: 0.9375rem;
+  margin-top: 0.55rem;
+  line-height: 1.3;
+}
+
+button.modal-mini {
+  font: inherit;
+  font-family: inherit;
+  margin: 0;
+}
+
+button.modal-mini.modal-mini--interactive {
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+button.modal-mini.modal-mini--interactive:hover:not(:disabled) {
+  border-color: #93c5fd;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.1);
+}
+
+button.modal-mini.modal-mini--interactive:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+}
+
+button.modal-mini.modal-mini--interactive:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.modal-mini.modal-mini--active {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2), 0 10px 24px rgba(15, 23, 42, 0.08);
+  background: #eff6ff;
+}
+
 .modal-stat {
   border: 1px solid #e2e8f0;
   border-radius: 0.75rem;
@@ -1147,26 +1411,6 @@ export default {
   font-size: 1.25rem;
   font-weight: 700;
   margin-top: 0.25rem;
-}
-
-.insight-card {
-  border-radius: 0.75rem;
-  padding: 0.9rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-}
-
-.insight-title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #0f172a;
-  margin-bottom: 0.45rem;
-}
-
-.insight-description {
-  font-size: 0.85rem;
-  color: #334155;
-  line-height: 1.5;
 }
 
 .tc-logo {

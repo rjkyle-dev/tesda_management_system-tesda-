@@ -1,6 +1,6 @@
 <template>
 
-   <div class="fixed inset-0 z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+   <div class="fixed inset-0 z-[60]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
   
   <!-- Background overlay -->
   <div class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -12,7 +12,7 @@
       class="w-full h-full flex items-center justify-center animate__animated animate__slideInUp" 
       ref="modal"
     >
-      <div class="bg-white shadow w-full h-full overflow-auto">
+      <div class="bg-white shadow w-full min-w-0 max-w-full h-full overflow-auto">
         
         <!-- Top Tab Bar -->
         <div class="flex justify-between items-center p-4 border-b bg-primary-600">
@@ -30,7 +30,7 @@
         <div class="p-6">
 
            <!-- Shared Wrapper (Optional) -->
-            <div class="w-full px-4">
+            <div class="w-full min-w-0 max-w-full px-4">
 
             <!-- Stepper Wrapper -->
             <div class="max-w-5xl mx-auto overflow-x-auto py-6 bg-white rounded-xl shadow">
@@ -79,14 +79,13 @@
             </div>
 
             <!-- Details Container -->
-            <div class="max-w-5xl mx-auto bg-white rounded-xl shadow p-6 mt-6 space-y-4">
+            <div class="max-w-5xl mx-auto w-full min-w-0 bg-white rounded-xl shadow p-6 mt-6 space-y-4">
                 <!-- Title -->
-                <div class="flex items-center gap-2">
-                    <h2 class="flex-none text-2xl font-bold text-gray-800 mb-4">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                    <h2 class="min-w-0 flex-1 text-xl sm:text-2xl font-bold text-gray-800 break-words">
                     {{ data.tc_id ? data.tc_id.description : '-' }}
                     </h2>
-                    <div class="flex-auto"></div>
-                    <button class="flex-none px-4 py-2 my-2 rounded-lg duration-300 text-sm bg-blue-500 text-white" @click="getSummaryTrainees">
+                    <button type="button" class="shrink-0 self-start sm:self-auto px-4 py-2 rounded-lg duration-300 text-sm bg-blue-500 text-white w-full sm:w-auto text-center" @click="getSummaryTrainees">
                         Review Billing Statements
                     </button>
                 </div>
@@ -181,7 +180,7 @@
 
                 </div>
 
-                <div class="flex items-center gap-2 justify-end" v-if="(data.status_id == 0 || data.status_id == 2) && $store.state.user.ut_id.description == 'PO Staff'">
+                <div class="flex flex-wrap items-center gap-2 justify-end" v-if="(data.status_id == 0 || data.status_id == 2) && $store.state.user.ut_id.description == 'PO Staff'">
                     <button class="px-4 py-2 my-2 rounded-lg duration-300 text-sm" @click="showUpdateForm(1)" :class="selectedStatus == 1 ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-800'" :disabled="isSubmitting">
                         Approve
                     </button>
@@ -199,7 +198,7 @@
             </div>
 
             <!--Trainees Table Modal-->
-            <div v-if="showTraineesTable" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+            <div v-if="showTraineesTable" class="fixed inset-0 z-[70] flex items-center justify-center bg-black bg-opacity-60">
                 <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-6xl relative overflow-auto max-h-[90vh]">
                 <h3 class="text-lg font-semibold mb-4">{{ billing_data.bt_id.description }}</h3>
 
@@ -274,7 +273,7 @@
 
             <!-- Trainee Summary Modal -->
 
-            <div v-if="showSummaryTrainee" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60" @click="showSummaryTrainee = false">
+            <div v-if="showSummaryTrainee" class="fixed inset-0 z-[70] flex items-center justify-center bg-black bg-opacity-60" @click="showSummaryTrainee = false">
                 <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-6xl relative overflow-auto max-h-[90vh]">
 
                     <table class="min-w-full border-collapse text-xs">
@@ -359,7 +358,7 @@
 
             <!-- Inner Modal (Billing Upload Form) -->
 
-            <div v-if="showUpdateBilling" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+            <div v-if="showUpdateBilling" class="fixed inset-0 z-[70] flex items-center justify-center bg-black bg-opacity-60">
                 <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-6xl relative overflow-auto max-h-[90vh]">
                 <h3 class="text-lg font-semibold mb-4">{{ billing_data.bt_id.description }}</h3>
 
