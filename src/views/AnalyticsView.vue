@@ -38,8 +38,55 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-4">
+      <!-- Budget Utilization Rate (BUR) — blue #3B82F6 -->
       <div class="stat-card stat-card--blue card-anim" :style="{ animationDelay: '40ms' }">
+        <div class="stat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5">
+            <path
+              d="M3 17l6-6 4 4 7-9"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M3 7v10h10"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <p class="stat-label">Budget Utilization Rate <span class="stat-abbr">(BUR)</span></p>
+        <p class="stat-value">{{ avgBURDisplay }}%</p>
+      </div>
+
+      <!-- Billing Submission Compliance (BSC) — purple #8B5CF6 -->
+      <div class="stat-card stat-card--purple card-anim" :style="{ animationDelay: '85ms' }">
+        <div class="stat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5">
+            <path
+              d="M12 3l9 5-9 5-9-5 9-5Z"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M3 8v8l9 5 9-5V8"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <p class="stat-label">Billing Submission Compliance <span class="stat-abbr">(BSC)</span></p>
+        <p class="stat-value">{{ avgBSCDisplay }}%</p>
+      </div>
+
+      <!-- Enrollment Rate (ER) — green #10B981 -->
+      <div class="stat-card stat-card--green card-anim" :style="{ animationDelay: '130ms' }">
         <div class="stat-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5">
             <path
@@ -67,25 +114,16 @@
             />
           </svg>
         </div>
-        <div class="stat-meta">
-          <span class="stat-badge">+18%</span>
-        </div>
-        <p class="stat-label">Training Centers</p>
-        <p class="stat-value">{{ stats.total_tc }}</p>
+        <p class="stat-label">Enrollment Rate <span class="stat-abbr">(ER)</span></p>
+        <p class="stat-value">{{ avgERDisplay }}%</p>
       </div>
 
-      <div class="stat-card stat-card--green card-anim" :style="{ animationDelay: '85ms' }">
+      <!-- Completion Rate (CR) — yellow #EAB308 -->
+      <div class="stat-card stat-card--yellow card-anim" :style="{ animationDelay: '175ms' }">
         <div class="stat-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5">
             <path
-              d="M3 17l6-6 4 4 7-9"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M3 7v10h10"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
               stroke="currentColor"
               stroke-width="1.8"
               stroke-linecap="round"
@@ -93,66 +131,32 @@
             />
           </svg>
         </div>
-        <div class="stat-meta">
-          <span class="stat-badge">+5.3%</span>
-        </div>
-        <p class="stat-label">Avg Budget Utilization</p>
-        <p class="stat-value">{{ avgBURDisplay }}%</p>
+        <p class="stat-label">Completion Rate <span class="stat-abbr">(CR)</span></p>
+        <p class="stat-value">{{ avgCRDisplay }}%</p>
       </div>
 
-      <div class="stat-card stat-card--indigo card-anim" :style="{ animationDelay: '130ms' }">
+      <!-- Assessment Pass Rate (APR) — orange #F97316 -->
+      <div class="stat-card stat-card--orange card-anim" :style="{ animationDelay: '220ms' }">
         <div class="stat-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5">
             <path
-              d="M12 3l9 5-9 5-9-5 9-5Z"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M3 8v8l9 5 9-5V8"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </div>
-        <div class="stat-meta">
-          <span class="stat-badge">+{{ stats.list_tc.length || 0 }}</span>
-        </div>
-        <p class="stat-label">Centers Evaluated</p>
-        <p class="stat-value">{{ stats.list_tc.length || 0 }}</p>
-      </div>
-
-      <div class="stat-card stat-card--orange card-anim" :style="{ animationDelay: '175ms' }">
-        <div class="stat-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5">
-            <path
-              d="M12 21s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Z"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               stroke="currentColor"
               stroke-width="1.8"
               stroke-linecap="round"
               stroke-linejoin="round"
             />
-            <path
-              d="M12 10.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"
-              stroke="currentColor"
-              stroke-width="1.8"
-            />
           </svg>
         </div>
-        <div class="stat-meta">
-          <span class="stat-badge">100%</span>
-        </div>
-        <p class="stat-label">Qualifications</p>
-        <p class="stat-value">{{ stats.total_q }}</p>
+        <p class="stat-label">Assessment Pass Rate <span class="stat-abbr">(APR)</span></p>
+        <p class="stat-value">{{ avgAPRDisplay }}%</p>
       </div>
     </div>
 
     <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-base font-semibold text-gray-800">Line Chart: Performance by Training Center</h2>
-        <div class="text-xs text-gray-500">Blue: Budget Utilization Rate (%) | Green: Billing Submission Compliance Rate (%)</div>
+        <div class="text-xs text-gray-500">Blue: BUR (%) | Green: BSC (%)</div>
       </div>
 
       <svg v-if="chartPoints.length" viewBox="0 0 1000 360" class="w-full h-72">
@@ -229,11 +233,11 @@
             <tr class="bg-gray-50 text-gray-600">
               <th class="px-3 py-2 text-left w-14">Rank</th>
               <th class="px-3 py-2 text-left">Training Center</th>
-              <th class="px-3 py-2 text-center">BUR (%)</th>
-              <th class="px-3 py-2 text-center">Billing Compliance (%)</th>
-              <th class="px-3 py-2 text-center">Enrollment Rate (%)</th>
-              <th class="px-3 py-2 text-center">Completion Rate (%)</th>
-              <th class="px-3 py-2 text-center">Assessment Rate (%)</th>
+              <th class="px-3 py-2 text-center">BUR (30%)</th>
+              <th class="px-3 py-2 text-center">BSC (25%)</th>
+              <th class="px-3 py-2 text-center">ER (10%)</th>
+              <th class="px-3 py-2 text-center">CR (20%)</th>
+              <th class="px-3 py-2 text-center">APR (15%)</th>
               <th class="px-3 py-2 text-center">Weighted Score</th>
             </tr>
           </thead>
@@ -328,26 +332,72 @@
               </div>
             </div>
 
-            <div class="lg:col-span-5 grid grid-cols-2 gap-3">
-              <div class="modal-mini">
-                <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatBurPercent(selectedTrainingCenter.BUR) : '—' }}</p>
-                <p class="modal-mini-label">Budget Utilization Rate</p>
+            <div class="lg:col-span-5 flex flex-col gap-3">
+              <div class="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  class="modal-mini modal-mini--interactive modal-mini--prominent text-left min-w-0"
+                  :class="{ 'modal-mini--active': selectedMetricInsightKey === 'bur' }"
+                  :disabled="metricPercentNumber('bur') == null"
+                  :aria-pressed="selectedMetricInsightKey === 'bur'"
+                  aria-label="Show insight for Budget Utilization Rate (BUR)"
+                  @click="toggleMetricInsight('bur')"
+                >
+                  <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatBurPercent(selectedTrainingCenter.BUR) : '—' }}</p>
+                  <p class="modal-mini-label">Budget Utilization Rate (BUR)</p>
+                </button>
+
+                <button
+                  type="button"
+                  class="modal-mini modal-mini--interactive modal-mini--prominent text-left min-w-0"
+                  :class="{ 'modal-mini--active': selectedMetricInsightKey === 'bsc' }"
+                  :disabled="metricPercentNumber('bsc') == null"
+                  :aria-pressed="selectedMetricInsightKey === 'bsc'"
+                  aria-label="Show insight for Billing Submission Compliance (BSC)"
+                  @click="toggleMetricInsight('bsc')"
+                >
+                  <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatBscPercent(selectedTrainingCenter.BSC) : '—' }}</p>
+                  <p class="modal-mini-label">Billing Submission Compliance (BSC)</p>
+                </button>
               </div>
-              <div class="modal-mini">
-                <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatBscPercent(selectedTrainingCenter.BSC) : '—' }}</p>
-                <p class="modal-mini-label">Billing Compliance</p>
-              </div>
-              <div class="modal-mini">
-                <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatOptionalPercent(selectedTrainingCenter.ENR) : '—' }}</p>
-                <p class="modal-mini-label">Enrollment Rate</p>
-              </div>
-              <div class="modal-mini">
-                <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatOptionalPercent(selectedTrainingCenter.CRR) : '—' }}</p>
-                <p class="modal-mini-label">Completion Rate</p>
-              </div>
-              <div class="modal-mini col-span-2">
-                <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatOptionalPercent(selectedTrainingCenter.ASR) : '—' }}</p>
-                <p class="modal-mini-label">Assessment Rate</p>
+
+              <div class="grid grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  class="modal-mini modal-mini--interactive text-left min-w-0"
+                  :class="{ 'modal-mini--active': selectedMetricInsightKey === 'enr' }"
+                  :disabled="metricPercentNumber('enr') == null"
+                  :aria-pressed="selectedMetricInsightKey === 'enr'"
+                  aria-label="Show insight for Enrollment Rate (ER)"
+                  @click="toggleMetricInsight('enr')"
+                >
+                  <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatOptionalPercent(selectedTrainingCenter.ENR) : '—' }}</p>
+                  <p class="modal-mini-label">Enrollment Rate (ER)</p>
+                </button>
+                <button
+                  type="button"
+                  class="modal-mini modal-mini--interactive text-left min-w-0"
+                  :class="{ 'modal-mini--active': selectedMetricInsightKey === 'crr' }"
+                  :disabled="metricPercentNumber('crr') == null"
+                  :aria-pressed="selectedMetricInsightKey === 'crr'"
+                  aria-label="Show insight for Completion Rate (CR)"
+                  @click="toggleMetricInsight('crr')"
+                >
+                  <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatOptionalPercent(selectedTrainingCenter.CRR) : '—' }}</p>
+                  <p class="modal-mini-label">Completion Rate (CR)</p>
+                </button>
+                <button
+                  type="button"
+                  class="modal-mini modal-mini--interactive text-left min-w-0"
+                  :class="{ 'modal-mini--active': selectedMetricInsightKey === 'asr' }"
+                  :disabled="metricPercentNumber('asr') == null"
+                  :aria-pressed="selectedMetricInsightKey === 'asr'"
+                  aria-label="Show insight for Assessment Pass Rate (APR)"
+                  @click="toggleMetricInsight('asr')"
+                >
+                  <p class="modal-mini-value tabular-nums">{{ selectedTrainingCenter ? formatOptionalPercent(selectedTrainingCenter.ASR) : '—' }}</p>
+                  <p class="modal-mini-label">Assessment Pass Rate (APR)</p>
+                </button>
               </div>
             </div>
           </div>
@@ -477,6 +527,147 @@
 <script>
 import axios from 'axios';
 
+/** Hardcoded descriptive insights by score band (BUR, BSC, ENR, CRR, ASR, WPS). */
+const METRIC_RANGE_INSIGHTS = {
+  bur: {
+    label: 'Budget Utilization Rate (BUR)',
+    tiers: [
+      {
+        rangeLabel: '100% – 90%',
+        text: 'Excellent: Demonstrates high fiscal discipline. The program is fully utilizing resources as planned, minimizing the risk of budget "slashing" in the next fiscal cycle.',
+      },
+      {
+        rangeLabel: '89% – 80%',
+        text: 'Satisfactory: Good utilization, though minor delays in procurement or liquidation may exist. There is a slight risk of under-utilization if not monitored.',
+      },
+      {
+        rangeLabel: '79% – 70%',
+        text: 'Needs Improvement: Indicates bottlenecks in fund release or implementation. Suggests the program is falling behind schedule, risking a return of funds.',
+      },
+      {
+        rangeLabel: 'Below 70%',
+        text: 'Poor: Significant underspending. Indicates major operational hurdles, poor planning, or potential program irrelevance. Immediate intervention required.',
+      },
+    ],
+  },
+  bsc: {
+    label: 'Billing Submission Compliance (BSC)',
+    tiers: [
+      {
+        rangeLabel: '100% – 90%',
+        text: 'Highly Compliant: Administrative processes are seamless. Documentation is accurate and timely, ensuring zero friction with auditing bodies.',
+      },
+      {
+        rangeLabel: '89% – 80%',
+        text: 'Compliant: Mostly punctual, though occasional lapses in documentation occur. Systems are stable but could benefit from better automation or tracking.',
+      },
+      {
+        rangeLabel: '79% – 70%',
+        text: 'Lax Compliance: Frequent late submissions. This creates a "bottleneck" effect for other departments and risks audit findings or penalties.',
+      },
+      {
+        rangeLabel: 'Below 70%',
+        text: 'Non-Compliant: Critical failure in reporting. Suggests a lack of accountability or severe understaffing in administrative roles.',
+      },
+    ],
+  },
+  enr: {
+    label: 'Enrollment Rate (ER)',
+    tiers: [
+      {
+        rangeLabel: '100% – 90%',
+        text: 'Full Capacity: Marketing and recruitment are working perfectly. Resources (slots) are being fully maximized, resulting in the lowest "cost-per-head" possible.',
+      },
+      {
+        rangeLabel: '89% – 80%',
+        text: 'Optimal: Good turnout. Most slots are filled, though there is a small margin of wasted capacity that could have been utilized.',
+      },
+      {
+        rangeLabel: '79% – 70%',
+        text: 'Under-enrolled: Indicates low demand or poor awareness. The program is operating with excess capacity, leading to inefficient use of fixed overhead costs.',
+      },
+      {
+        rangeLabel: 'Below 70%',
+        text: 'Critically Under-enrolled: The program is at risk of being defunded. Suggests the training may no longer be relevant to the target audience or recruitment has failed.',
+      },
+    ],
+  },
+  crr: {
+    label: 'Completion Rate (CR)',
+    tiers: [
+      {
+        rangeLabel: '100% – 90%',
+        text: 'High Engagement: Exceptional student/trainee retention. Suggests that the curriculum is engaging and the support systems for participants are highly effective.',
+      },
+      {
+        rangeLabel: '89% – 80%',
+        text: 'Standard: Healthy retention levels. Most participants finish the course, with dropouts likely due to external personal factors rather than program flaws.',
+      },
+      {
+        rangeLabel: '79% – 70%',
+        text: 'Moderate Attrition: Significant numbers are leaving before the end. May indicate that the program is too difficult, too long, or lacks immediate value for the participant.',
+      },
+      {
+        rangeLabel: 'Below 70%',
+        text: 'High Attrition: Major red flag. The program is failing to keep participants engaged. Requires a review of teaching methods or participant selection criteria.',
+      },
+    ],
+  },
+  asr: {
+    label: 'Assessment Pass Rate (APR)',
+    tiers: [
+      {
+        rangeLabel: '100% – 90%',
+        text: 'Mastery Achieved: The training is highly effective. Participants are meeting or exceeding the required standards, proving the program’s quality.',
+      },
+      {
+        rangeLabel: '89% – 80%',
+        text: 'Competent: A solid majority are passing. The instruction is effective, though there may be room to refine the assessment or the depth of instruction.',
+      },
+      {
+        rangeLabel: '79% – 70%',
+        text: 'Marginal: A concerning portion of participants are failing to grasp the material. May indicate a gap between the curriculum level and the participants\' prior knowledge.',
+      },
+      {
+        rangeLabel: 'Below 70%',
+        text: 'Substandard: Indicates a failure in the learning process. Either the assessment is too disconnected from the material, or the instruction is not meeting the required standard.',
+      },
+    ],
+  },
+  wps: {
+    label: 'Weighted Performance Score',
+    tiers: [
+      {
+        rangeLabel: '100 – 90',
+        rating: 'Outstanding',
+        text: 'The center demonstrates exceptional fiscal discipline and high training quality. Most indicators are near-optimal, showing that funds are maximized and trainees are successfully transitioning from enrollment to competency certification.',
+      },
+      {
+        rangeLabel: '89 – 80',
+        rating: 'Very Satisfactory',
+        text: 'The center is highly reliable. It maintains strong administrative compliance and solid training outcomes. There may be minor gaps in resource maximization (e.g., slightly lower enrollment efficiency), but the core mission of "skills acquisition" is being met effectively.',
+      },
+      {
+        rangeLabel: '79 – 70',
+        rating: 'Satisfactory',
+        text: 'Performance is at a functional baseline. While the center meets basic requirements, there are likely inconsistencies in either budget utilization or timely billing. Training outcomes are acceptable, but there is noticeable room for improvement in trainee retention or pass rates.',
+      },
+      {
+        rangeLabel: 'Below 70',
+        rating: 'Needs Improvement',
+        text: 'The center is underperforming in critical areas. A score in this range often indicates under-utilized government funds or significant administrative delays (Compliance). It suggests a need for a tactical review of recruitment strategies or training delivery methods to prevent resource waste.',
+      },
+    ],
+  },
+};
+
+function tierIndexForPercent(pct) {
+  if (pct >= 90) return 0;
+  if (pct >= 80) return 1;
+  if (pct >= 70) return 2;
+  return 3;
+}
+
 export default {
   data() {
     return {
@@ -511,6 +702,32 @@ export default {
     },
     avgBURDisplay() {
       return this.avgBUR.toFixed(2);
+    },
+    avgBSC() {
+      if (!this.stats.list_tc.length) return 0;
+      const total = this.stats.list_tc.reduce((sum, item) => sum + this.dashboardRatePercent(item.BSC), 0);
+      return total / this.stats.list_tc.length;
+    },
+    avgBSCDisplay() {
+      return this.avgBSC.toFixed(2);
+    },
+    avgER() {
+      return this.averageOptionalListTcPercent(['ENR', 'enrollment_rate', 'enrollmentRate', 'enrollment']);
+    },
+    avgERDisplay() {
+      return this.avgER.toFixed(2);
+    },
+    avgCR() {
+      return this.averageOptionalListTcPercent(['CRR', 'completion_rate', 'completionRate', 'completion']);
+    },
+    avgCRDisplay() {
+      return this.avgCR.toFixed(2);
+    },
+    avgAPR() {
+      return this.averageOptionalListTcPercent(['ASR', 'assessment_rate', 'assessmentRate', 'assessment']);
+    },
+    avgAPRDisplay() {
+      return this.avgAPR.toFixed(2);
     },
     chartPoints() {
       if (!this.stats.list_tc.length) return [];
@@ -825,6 +1042,21 @@ export default {
       }
       return null;
     },
+    /** Average 0–100% across TC rows that have a finite value for any of the given keys (ENR / CRR / ASR style fields). */
+    averageOptionalListTcPercent(keys) {
+      const list = this.stats.list_tc;
+      if (!list || !list.length) return 0;
+      let sum = 0;
+      let n = 0;
+      for (let i = 0; i < list.length; i++) {
+        const v = this.firstNumber(list[i], keys);
+        if (v != null && Number.isFinite(v)) {
+          sum += this.dashboardRatePercent(v);
+          n += 1;
+        }
+      }
+      return n ? sum / n : 0;
+    },
     formatCurrency(value) {
       const n = Number(value);
       if (!Number.isFinite(n)) return '—';
@@ -1025,8 +1257,14 @@ export default {
 .stat-label {
   position: relative;
   margin-top: 0.75rem;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  line-height: 1.35;
   color: rgba(255, 255, 255, 0.92);
+}
+
+.stat-abbr {
+  font-weight: 700;
+  opacity: 0.95;
 }
 
 .stat-value {
@@ -1037,20 +1275,40 @@ export default {
   letter-spacing: -0.02em;
 }
 
+/* Metric card palette (reference hex per KPI) */
 .stat-card--blue {
-  background: linear-gradient(110deg, #0ea5e9 0%, #2563eb 60%, #1d4ed8 100%);
+  background: linear-gradient(110deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%);
+}
+
+.stat-card--purple {
+  background: linear-gradient(110deg, #7c3aed 0%, #8b5cf6 50%, #a78bfa 100%);
 }
 
 .stat-card--green {
-  background: linear-gradient(110deg, #22c55e 0%, #10b981 55%, #059669 100%);
+  background: linear-gradient(110deg, #059669 0%, #10b981 50%, #34d399 100%);
 }
 
-.stat-card--indigo {
-  background: linear-gradient(110deg, #6366f1 0%, #3b82f6 60%, #2563eb 100%);
+.stat-card--yellow {
+  background: linear-gradient(110deg, #ca8a04 0%, #eab308 48%, #facc15 100%);
+}
+
+.stat-card--yellow .stat-label,
+.stat-card--yellow .stat-value {
+  color: #0f172a;
+}
+
+.stat-card--yellow .stat-abbr {
+  color: #020617;
+}
+
+.stat-card--yellow .stat-icon {
+  background: rgba(15, 23, 42, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.14);
+  color: #1e293b;
 }
 
 .stat-card--orange {
-  background: linear-gradient(110deg, #f59e0b 0%, #f97316 55%, #ea580c 100%);
+  background: linear-gradient(110deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
 }
 
 .status-badge {
