@@ -1,324 +1,617 @@
 <template>
-  <div class="flex-auto flex flex-col">
+  <div class="billing-record-page flex-auto flex flex-col min-h-0">
+    <div class="billing-record-inner">
+      <h1 class="billing-page-title animate__slideInUp">Training Center Billing</h1>
 
-    <!-- STATUS FOLDER TABS -->
-    <div class="bg-white px-4 pt-2 border-b border-gray-200">
-      <div class="flex space-x-1">
+      <div class="billing-top-toolbar animate__slideInUp billing-animate-fill billing-animate-delay-1">
+        <div class="billing-controls-stack">
+          <div class="billing-tabs-wrap">
+            <button
+              v-for="tab in statusTabs"
+              :key="tab.key"
+              type="button"
+              class="billing-tab"
+              :class="{ 'billing-tab-active': activeTab === tab.key }"
+              @click="onStatusTabClick(tab.key)"
+            >
+              {{ tab.label }}
+            </button>
+          </div>
 
-        <button
-          v-for="tab in statusTabs"
-          :key="tab.key"
-          @click="onStatusTabClick(tab.key)"
-          class="relative px-5 py-2 text-lg font-medium transition-all tracking-widest"
-          :class="activeTab === tab.key
-            ? 'bg-white border border-b-0 border-gray-300 text-primary-600 rounded-t-lg z-10'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-t-lg'"
-        >
-          {{ tab.label }}
+          <div class="billing-tc-toolbar-row">
+            <div class="billing-search-outer">
+              <div class="billing-search-wrap">
+                <span class="billing-search-icon" aria-hidden="true">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </span>
+                <input
+                  type="search"
+                  class="billing-search-input"
+                  placeholder="Search control number..."
+                  autocomplete="off"
+                  @input="getAllData($event.target.value, 'search')"
+                />
+              </div>
+            </div>
+            <button type="button" class="billing-primary-btn" @click="openModal('add', 0)">
+              {{ isWorkback == 1 ? 'Add workback' : 'Create bill' }}
+            </button>
+          </div>
+        </div>
 
-          <span
-            v-if="activeTab === tab.key"
-            class="absolute inset-x-0 -bottom-px h-0.5 bg-primary-600"
-          ></span>
-        </button>
-
+        <div class="billing-pagination-wrap" v-if="billingRows.length > 0 && total_cnt > page_limit">
+          <div class="pagination_cmp">
+            <vue-awesome-paginate
+              :total-items="total_cnt"
+              :items-per-page="page_limit"
+              v-model="page"
+              @click="getAllData(null, null)"
+            >
+              <template #prev-button>
+                <span class="px-2 text-sm">Prev</span>
+              </template>
+              <template #next-button>
+                <span class="px-2 text-sm">Next</span>
+              </template>
+            </vue-awesome-paginate>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- TOP ACTION BAR -->
-    <div class="flex items-center w-full bg-white gap-4 border-b border-gray-200">
-
-      <div class="flex-none">
-        <button
-          class="bg-primary-600 hover:bg-primary-500 text-white px-4 py-2 mx-4 my-2 rounded-lg duration-300"
-          @click="openModal('add',0)"
-        >
-          {{ isWorkback == 1 ? 'Add Workback +' : 'Create Bill +' }}
-        </button>
-      </div>
-
-      <div class="flex-auto">
-        <input
-          type="text"
-          class="font-bold border-gray-300 w-full rounded-md text-sm
-                 focus:outline-none focus:ring-1 focus:ring-primary-500
-                 focus:border-primary-500"
-          placeholder="Search control number.."
-          @input="getAllData($event.target.value, 'search')"
-        >
-      </div>
-
-      <div class="flex-none">
-        <div class="pagination_cmp px-3" v-if="alldata.length > page_limit">
-          <vue-awesome-paginate
-            :total-items="total_cnt"
-            :items-per-page="page_limit"
-            v-model="page"
-            @click="getAllData(null,null)"
-          >
-            <template #prev-button>
-              <span>Prev</span>
-            </template>
-
-            <template #next-button>
-              <span>Next</span>
-            </template>
-          </vue-awesome-paginate>
+      <div class="billing-table-card animate__slideInUp billing-animate-fill billing-animate-delay-2">
+        <div class="billing-table-scroll">
+          <table class="billing-table billing-table-tc">
+            <thead>
+              <tr>
+                <th scope="col">Control #</th>
+                <th scope="col">Batch</th>
+                <th scope="col">Qualification</th>
+                <th scope="col" class="billing-th-center">Status</th>
+                <th scope="col" class="billing-th-center">Next billing</th>
+                <th scope="col">Date added</th>
+                <th scope="col" class="billing-th-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="billingRows.length === 0">
+                <td colspan="7" class="billing-table-empty">
+                  There are no files yet.
+                </td>
+              </tr>
+              <tr
+                v-for="i in billingRows"
+                :key="i.id"
+                class="billing-table-row"
+              >
+                <td class="billing-td-muted">{{ checkIfEmpty(i.ctrl_num) }}</td>
+                <td class="billing-td-muted">{{ checkIfEmpty(i.batch_name) }}</td>
+                <td class="billing-td-muted">{{ i.q_id ? i.q_id.description : '-' }}</td>
+                <td class="billing-td-center">
+                  <span class="billing-status-pill" :class="getStatusPillClass(i.status_id)">
+                    {{ getStatus(i.status_id) }}
+                  </span>
+                </td>
+                <td class="billing-td-center billing-td-muted">{{ nextBillingDisplay(i) }}</td>
+                <td class="billing-td-muted">{{ getDateShort(i.datetime_added) }}</td>
+                <td class="billing-td-actions">
+                  <div class="billing-actions">
+                    <button
+                      v-if="i.status_id == 0 || i.status_id == 3"
+                      type="button"
+                      class="billing-icon-btn"
+                      aria-label="Edit record"
+                      @click="openModal('edit', i.id)"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="billing-icon-btn"
+                      aria-label="View record"
+                      @click="openViewModal('view', i.id)"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <!-- TABLE -->
-    <div class="bg-white m-4 rounded-md shadow-sm border border-gray-300 border-t-0">
+    <AddTCBilling
+      v-if="show_Modal_Add"
+      @close-modal="show_Modal_Add = false"
+      :refreshData="refreshData"
+      :showNotification="showNotification"
+      :item_data="item_data"
+    />
 
-      <div class="relative scrollbar sm:rounded-b-md mx-6">
-
-        <table class="w-full text-sm text-left text-gray-500">
-          <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left">Control #</th>
-              <th class="px-6 py-3 text-left">Batch Name</th>
-              <th class="px-6 py-3 text-left">Qualification</th>
-              <th class="py-3 text-center w-40">Status</th>
-              <th class="py-3 text-center w-40">Next Billing</th>
-              <th class="py-3 text-center w-40">Date & Time added</th>
-              <th class="px-6 py-3 text-center w-28">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr v-if="alldata.length == 0">
-              <td colspan="7" class="py-6 text-center text-gray-500 text-sm">
-                There are no files yet.
-              </td>
-            </tr>
-
-            <tr
-              v-for="i in alldata"
-              :key="i.id"
-              class="border-b hover:bg-gray-200 transition"
-            >
-              <td class="px-6 py-4">{{ checkIfEmpty(i.ctrl_num) }}</td>
-              <td class="px-6 py-4">{{ checkIfEmpty(i.batch_name) }}</td>
-              <td class="px-6 py-4">{{ i.q_id ? i.q_id.description : '-' }}</td>
-
-              <td class="px-6 py-4 text-center">
-                <span
-                  class="px-4 py-1 rounded-full text-xs text-white"
-                  :class="getStatusClass(i.status_id)"
-                >
-                  {{ getStatus(i.status_id) }}
-                </span>
-              </td>
-
-              <td class="px-6 py-4 text-center">
-                <span
-                  class="text-xs"
-                  :class="!i.current_billing
-                    ? 'bg-green-600 px-4 py-1 text-white rounded-full'
-                    : ''"
-                >
-                  {{ i.current_billing && i.current_billing.status !== 1
-                    ? getDateFormat(i.current_billing.datetime_due)
-                    : 'Finished' }}
-                </span>
-              </td>
-
-              <td class="px-6 py-4 text-center">
-                {{ getDateTimeFormat(i.datetime_added) }}
-              </td>
-
-              <td class="px-6 py-4 text-center">
-                <div class="flex items-center justify-center space-x-2">
-                  <img
-                    v-if="i.status_id == 0 || i.status_id == 3"
-                    src="../assets/icon_edit.png"
-                    class="h-4 cursor-pointer"
-                    @click="openModal('edit',i.id)"
-                  >
-                  <img
-                    src="../assets/action_icon_view.png"
-                    class="h-4 cursor-pointer"
-                    @click="openViewModal('view',i.id)"
-                  >
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-      </div>
-    </div>
-
+    <BillingInfoModal
+      v-if="show_Modal_View"
+      @close-modal="show_Modal_View = false"
+      :refreshData="refreshData"
+      :showNotification="showNotification"
+      :item_data="item_data"
+    />
   </div>
-
-  <AddTCBilling
-    v-if="show_Modal_Add"
-    @close-modal="show_Modal_Add = false"
-    :refreshData="refreshData"
-    :showNotification="showNotification"
-    :item_data="item_data"
-  />
-
-  <BillingInfoModal
-    v-if="show_Modal_View"
-    @close-modal="show_Modal_View = false"
-    :refreshData="refreshData"
-    :showNotification="showNotification"
-    :item_data="item_data"
-  />
 </template>
 
-
 <script>
-
 import AddTCBilling from '@/components/Modals/AddTCBilling.vue';
 import BillingInfoModal from '@/components/Modals/BillingInfoModal.vue';
 import axios from 'axios';
 import moment from 'moment';
 
-export default{
-    components: {
-        AddTCBilling,
-        BillingInfoModal
-    },
-    mounted(){
-        const statusFromQuery = this.$route.query.status
+export default {
+  components: {
+    AddTCBilling,
+    BillingInfoModal,
+  },
+  mounted() {
+    const statusFromQuery = this.$route.query.status;
 
-        if (statusFromQuery) {
-        this.activeTab = statusFromQuery
-        } else {
-        // Set default URL
-        this.updateStatusQuery(this.activeTab)
-        }
-
-        this.refreshData();
-    },
-    props:{
-        showNotification : Function
-    },
-    data(){
-        return{
-            activeTab: 'pending',
-            statusTabs: [
-            { key: 'pending', label: 'PENDING' },
-            { key: 'approved', label: 'APPROVED' },
-            { key: 'denied', label: 'REVISION' },
-            { key: 'completed', label: 'FINISHED' }
-            ],
-            isWorkback : null,
-            alldata : '',
-            page: 1,
-            total_cnt: 0,
-            total_pages : 0,
-            page_limit : 25,
-            show_Modal_Add : false,
-            show_Modal_View : false,
-
-            item_data : {
-                id : 0,
-                isWorkback : null,
-            }
-        }
-    },
-    methods: {
-        onStatusTabClick(status) {
-        if (this.activeTab === status) return
-
-        this.activeTab = status
-        this.updateStatusQuery(status)
-        this.getAllData(null, null)
-        },
-
-        updateStatusQuery(status) {
-        this.$router.push({
-            query: {
-            ...this.$route.query,
-            status
-            }
-        })
-        },
-        openViewModal(action, id){
-            this.item_data.action = action;
-            this.item_data.id = id;
-            this.show_Modal_View = true;
-        },
-        refreshData(){
-            this.getParamType();
-        },
-        getStatusClass(val){
-            if(val == 0) return "bg-orange-500";
-            else if(val == 1) return "bg-green-500";
-            else if(val == 2) return "bg-orange-500";
-            else if(val == 3) return "bg-green-500";
-        },
-        getStatus(val){
-            if(val == 0) return "Pending";
-            else if(val == 1) return "Approved";
-            else if(val == 2) return "For Revision";
-            else if(val == 3) return "Completed";
-        },
-        getParamType(){
-            this.isWorkback = this.$route.params.isWorkback;
-            this.getAllData(null, null);
-        },
-        getDateFormat(value){
-        return moment(value).format('MMMM DD, YYYY');
-        },
-        getDateTimeFormat(value){
-        return moment(value).format('MMMM DD, YYYY h:mm a');
-        },
-        checkIfEmpty(val){
-        if(val) return val;
-        else return "-";
-        },
-        formatUserName(i){
-            if(i != null){
-                return i.lname + ", " + i.fname + " " + i.mname + " " + i.suffix;
-            }
-            else return "-";
-        },
-        openModal(action, id){
-            this.item_data.action = action;
-            this.item_data.id = id;
-            this.item_data.isWorkback = this.isWorkback;
-            this.show_Modal_Add = true;
-        },
-       getAllData(search_value, type) {
-
-            var status_id = null;
-            if(this.activeTab == 'pending') status_id = 0;
-            if(this.activeTab == 'approved') status_id = 1;
-            if(this.activeTab == 'denied') status_id = 2;
-            if(this.activeTab == 'completed') status_id = 3;
-
-            const params = {};
-
-            if (search_value !== null && type) {
-                params.value = search_value;
-                params.type = type;
-            }
-
-            axios.get(
-                `${process.env.VUE_APP_BASE_URL}/billing_records/get_all_by_page_type_user/${this.$store.state.user.tc_id.id}/${this.isWorkback}/${this.page}/${this.page_limit}/${status_id}`,
-                { params }     // <-- IMPORTANT
-            )
-            .then(res => {
-                if (res.status === 200) {
-                    this.alldata = res.data[0];
-                    this.total_cnt = res.data[1];
-                }
-            });
-        }
-    },
-    watch: {
-        '$route.query.status'(newStatus) {
-        if (newStatus && newStatus !== this.activeTab) {
-            this.activeTab = newStatus
-            this.refreshData();
-        }
-        }
+    if (statusFromQuery) {
+      this.activeTab = statusFromQuery;
+    } else {
+      this.updateStatusQuery(this.activeTab);
     }
+
+    this.refreshData();
+  },
+  props: {
+    showNotification: Function,
+  },
+  data() {
+    return {
+      activeTab: 'pending',
+      statusTabs: [
+        { key: 'pending', label: 'Pending' },
+        { key: 'approved', label: 'Approved' },
+        { key: 'denied', label: 'For Revision' },
+        { key: 'completed', label: 'Finished' },
+      ],
+      isWorkback: null,
+      alldata: '',
+      page: 1,
+      total_cnt: 0,
+      total_pages: 0,
+      page_limit: 25,
+      show_Modal_Add: false,
+      show_Modal_View: false,
+
+      item_data: {
+        id: 0,
+        isWorkback: null,
+      },
+    };
+  },
+  computed: {
+    billingRows() {
+      return Array.isArray(this.alldata) ? this.alldata : [];
+    },
+  },
+  methods: {
+    onStatusTabClick(status) {
+      if (this.activeTab === status) return;
+
+      this.activeTab = status;
+      this.updateStatusQuery(status);
+      this.getAllData(null, null);
+    },
+
+    updateStatusQuery(status) {
+      this.$router.push({
+        query: {
+          ...this.$route.query,
+          status,
+        },
+      });
+    },
+    openViewModal(action, id) {
+      this.item_data.action = action;
+      this.item_data.id = id;
+      this.show_Modal_View = true;
+    },
+    refreshData() {
+      this.getParamType();
+    },
+    getStatusPillClass(val) {
+      if (val == 0) return 'billing-status-pending';
+      if (val == 1) return 'billing-status-approved';
+      if (val == 2) return 'billing-status-revision';
+      if (val == 3) return 'billing-status-completed';
+      return 'billing-status-pending';
+    },
+    getDateShort(value) {
+      if (!value) return '—';
+      return moment(value).format('MMM D, YYYY');
+    },
+    nextBillingDisplay(i) {
+      if (i.current_billing && i.current_billing.status !== 1 && i.current_billing.datetime_due) {
+        return this.getDateShort(i.current_billing.datetime_due);
+      }
+      return '—';
+    },
+    getStatus(val) {
+      if (val == 0) return 'Pending';
+      if (val == 1) return 'Approved';
+      if (val == 2) return 'For Revision';
+      if (val == 3) return 'Finished';
+      return '-';
+    },
+    getParamType() {
+      this.isWorkback = this.$route.params.isWorkback;
+      this.getAllData(null, null);
+    },
+    checkIfEmpty(val) {
+      if (val) return val;
+      return '-';
+    },
+    openModal(action, id) {
+      this.item_data.action = action;
+      this.item_data.id = id;
+      this.item_data.isWorkback = this.isWorkback;
+      this.show_Modal_Add = true;
+    },
+    getAllData(search_value, type) {
+      let status_id = null;
+      if (this.activeTab == 'pending') status_id = 0;
+      if (this.activeTab == 'approved') status_id = 1;
+      if (this.activeTab == 'denied') status_id = 2;
+      if (this.activeTab == 'completed') status_id = 3;
+
+      const params = {};
+
+      if (search_value !== null && search_value !== undefined && type) {
+        params.value = search_value;
+        params.type = type;
+      }
+
+      axios
+        .get(
+          `${process.env.VUE_APP_BASE_URL}/billing_records/get_all_by_page_type_user/${this.$store.state.user.tc_id.id}/${this.isWorkback}/${this.page}/${this.page_limit}/${status_id}`,
+          { params },
+        )
+        .then((res) => {
+          if (res.status === 200) {
+            this.alldata = res.data[0];
+            this.total_cnt = res.data[1];
+          }
+        });
+    },
+  },
+  watch: {
+    '$route.query.status'(newStatus) {
+      if (newStatus && newStatus !== this.activeTab) {
+        this.activeTab = newStatus;
+        this.refreshData();
+      }
+    },
+  },
+};
+</script>
+
+<style scoped>
+.billing-record-page {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
-</script>
+.billing-record-inner {
+  padding: 1.25rem 1.5rem 2rem;
+  max-width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .billing-record-inner {
+    padding: 1.5rem 2rem 2.5rem;
+  }
+}
+
+.billing-page-title {
+  margin: 0 0 1.25rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.billing-animate-fill {
+  animation-fill-mode: backwards;
+}
+
+.billing-animate-delay-1 {
+  animation-delay: 0.06s;
+}
+
+.billing-animate-delay-2 {
+  animation-delay: 0.12s;
+}
+
+.billing-top-toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .billing-top-toolbar {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+}
+
+.billing-controls-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.billing-tabs-wrap {
+  display: inline-flex;
+  flex-wrap: wrap;
+  width: fit-content;
+  max-width: 100%;
+  gap: 0.3rem;
+  padding: 0.35rem;
+  background: #f3f4f6;
+  border-radius: 9999px;
+  border: 1px solid #e5e7eb;
+}
+
+.billing-tab {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.9rem;
+  border: none;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.billing-tab:hover {
+  color: #374151;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.billing-tab-active {
+  background: #2563eb;
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.35);
+}
+
+.billing-tab-active:hover {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.billing-tc-toolbar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.billing-search-outer {
+  width: fit-content;
+  max-width: min(100%, 22rem);
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.billing-search-wrap {
+  position: relative;
+  width: 100%;
+  min-width: 14rem;
+}
+
+.billing-search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+  display: flex;
+}
+
+.billing-search-input {
+  width: 100%;
+  padding: 0.6rem 1rem 0.6rem 2.65rem;
+  border-radius: 0.65rem;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  font-size: 0.875rem;
+  color: #111827;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.billing-search-input::placeholder {
+  color: #9ca3af;
+}
+
+.billing-search-input:focus {
+  outline: none;
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.billing-primary-btn {
+  flex-shrink: 0;
+  padding: 0.6rem 1rem;
+  border-radius: 0.65rem;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  background: #2563eb;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.35);
+  transition: background 0.15s ease;
+  white-space: nowrap;
+}
+
+.billing-primary-btn:hover {
+  background: #1d4ed8;
+}
+
+.billing-pagination-wrap {
+  flex-shrink: 0;
+}
+
+.billing-table-card {
+  background: #fff;
+  border-radius: 1rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+
+.billing-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.billing-table {
+  width: 100%;
+  min-width: 56rem;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.billing-table-tc {
+  min-width: 48rem;
+}
+
+.billing-table thead {
+  background: #f9fafb;
+}
+
+.billing-table th {
+  padding: 0.875rem 1rem;
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  border-bottom: 1px solid #f1f5f9;
+  white-space: nowrap;
+}
+
+.billing-th-center {
+  text-align: center;
+}
+
+.billing-th-right {
+  text-align: right;
+}
+
+.billing-table tbody tr {
+  background: #fff;
+}
+
+.billing-table-row:hover {
+  background: #fafafa;
+}
+
+.billing-table td {
+  padding: 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.billing-table-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: #6b7280;
+  font-size: 0.9375rem;
+}
+
+.billing-td-muted {
+  color: #64748b;
+  font-weight: 400;
+}
+
+.billing-td-center {
+  text-align: center;
+}
+
+.billing-td-actions {
+  text-align: right;
+  width: 1%;
+  white-space: nowrap;
+}
+
+.billing-status-pill {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.billing-status-pending {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.billing-status-approved {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.billing-status-revision {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+.billing-status-completed {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.billing-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.15rem;
+}
+
+.billing-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.billing-icon-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+</style>

@@ -1,10 +1,8 @@
 <template>
-
-    <div class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        
+  <Teleport to="body">
+    <div class="fixed inset-0 z-[100]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-    
-        <div class="fixed z-10 inset-0 overflow-y-auto my-4">
+        <div class="fixed inset-0 overflow-y-auto my-4">
         
         <div class="flex items-center sm:items-center justify-center min-h-full px-8 py-2 sm:p-0 animate__slideInUp" ref="modal">
         
@@ -170,14 +168,13 @@
         </div>
     
     </div>
-        
-    
+
     <!-- Child Modal -->
 <div
   v-if="showChildModal"
-  class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50"
+  class="fixed inset-0 z-[110] flex items-center justify-center bg-black bg-opacity-60"
 >
-  <div class="bg-white p-6 rounded shadow-lg w-1/2 relative z-60 max-h-[90vh] overflow-y-auto">
+  <div class="relative z-[1] bg-white p-6 rounded shadow-lg w-1/2 max-h-[90vh] overflow-y-auto">
     <h3 class="text-lg font-semibold mb-3">Generated Billing Record Info</h3>
 
     <p class="mt-2 text-gray-600"><strong class="text-gray-800">Control number:</strong> {{ data.ctrl_num ? data.ctrl_num : 'No data' }}</p>
@@ -307,10 +304,8 @@
     </div>
   </div>
 </div>
-
-    
-        
-    </template>
+  </Teleport>
+</template>
     
     <script>
     import axios from 'axios';

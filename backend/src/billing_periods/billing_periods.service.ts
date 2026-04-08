@@ -312,15 +312,65 @@ export class BillingPeriodsService {
             .andWhere("billing_record.fiscal_yr = :fiscal_yr", { fiscal_yr })
             .getRawOne();
 
+            const pqmBaseQb = () =>
+                this.dataSource
+                    .getRepository(BillingRecordsEntity)
+                    .createQueryBuilder('br')
+                    .select('br.ctrl_num', 'ctrl_num')
+                    .where('br.tc_id = :tc_id', { tc_id })
+                    .andWhere('br.fiscal_yr = :fiscal_yr', { fiscal_yr })
+                    .andWhere('br.isWorkback = :wb', { wb: 0 })
+                    .groupBy('br.ctrl_num')
+                    .orderBy('br.ctrl_num', 'ASC');
 
-        
+            const pqmRows = await pqmBaseQb().getRawMany();
+            const pqm_codes = pqmRows.map((r) => String(r.ctrl_num ?? '').trim()).filter(Boolean);
+
+            const pendingPqmRows = await pqmBaseQb()
+                .andWhere('br.status_id = :status', { status: 0 })
+                .getRawMany();
+
+            const pending_pqm_codes = pendingPqmRows
+                .map((r) => String(r.ctrl_num ?? '').trim())
+                .filter(Boolean);
+
+            const pqmBreakdownRaw = await this.dataSource
+                .getRepository(BillingRecordsEntity)
+                .createQueryBuilder('br')
+                .leftJoin(
+                    BillingPeriodsEntity,
+                    'bp',
+                    'bp.ctrl_num = br.ctrl_num AND bp.status = :bpOk',
+                    { bpOk: 1 },
+                )
+                .select('br.ctrl_num', 'ctrl_num')
+                .addSelect('COALESCE(SUM(bp.total_payment), 0)', 'allocated_budget')
+                .addSelect('COALESCE(SUM(bp.total_utilized), 0)', 'utilized_budget')
+                .where('br.tc_id = :tc_id', { tc_id })
+                .andWhere('br.fiscal_yr = :fiscal_yr', { fiscal_yr })
+                .andWhere('br.isWorkback = :wb', { wb: 0 })
+                .groupBy('br.ctrl_num')
+                .orderBy('br.ctrl_num', 'ASC')
+                .getRawMany();
+
+            const pqm_breakdown = pqmBreakdownRaw
+                .map((r) => ({
+                    ctrl_num: String(r.ctrl_num ?? '').trim(),
+                    allocated_budget: Number.parseFloat(String(r.allocated_budget ?? 0)) || 0,
+                    utilized_budget: Number.parseFloat(String(r.utilized_budget ?? 0)) || 0,
+                }))
+                .filter((r) => r.ctrl_num);
+
             return {
             total_unutilized : total_unutilized.cnt,
             total_utilized : total_utilized.cnt,
             total_payment : total_payment.cnt,
             total_pending : total_pending.cnt,
             total_submitted : total_submitted.cnt,
-            total_implemented : total_implemented.cnt
+            total_implemented : total_implemented.cnt,
+            pqm_codes,
+            pending_pqm_codes,
+            pqm_breakdown,
             };
         }
 

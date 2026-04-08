@@ -396,13 +396,13 @@
               </div>
             </div>
           </div>
-
+        <!--Summary Table Modal-->
           <div class="mt-4 border border-slate-200 rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
               <table class="min-w-full text-xs">
                 <thead>
                   <tr class="bg-slate-100 text-slate-700">
-                    <th class="px-3 py-2 text-left whitespace-nowrap">Training Center</th>
+                    <th class="px-3 py-2 text-left whitespace-nowrap">PQM Code</th>
                     <th class="px-3 py-2 text-center whitespace-nowrap">Allocated Budget</th>
                     <th class="px-3 py-2 text-center whitespace-nowrap">Utilized Budget</th>
                     <th class="px-3 py-2 text-center whitespace-nowrap">Billable Submissions</th>
@@ -418,24 +418,46 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="border-b border-slate-100">
-                    <td class="px-3 py-2 font-semibold text-slate-800 whitespace-nowrap">
-                      {{ selectedTrainingCenter?.abbre || selectedTrainingCenter?.trainingCenter || '—' }}
-                    </td>
-                    <td class="px-3 py-2 text-center tabular-nums">{{ formatCurrency(modalStats?.total_payment) }}</td>
-                    <td class="px-3 py-2 text-center tabular-nums">{{ formatCurrency(modalStats?.total_utilized) }}</td>
-                    <td class="px-3 py-2 text-center tabular-nums">{{ formatCount(selectedTrainingCenter?.totalBillableSubmissions) }}</td>
-                    <td class="px-3 py-2 text-center tabular-nums">{{ formatCount(selectedTrainingCenter?.onTimeCorrectSubmissions) }}</td>
-                    <td class="px-3 py-2 text-center tabular-nums">{{ formatCount(selectedTrainingCenter?.approvedSlots) }}</td>
-                    <td class="px-3 py-2 text-center tabular-nums">—</td>
-                    <td class="px-3 py-2 text-center tabular-nums">—</td>
-                    <td class="px-3 py-2 text-center tabular-nums">—</td>
-                    <td class="px-3 py-2 text-center tabular-nums">—</td>
-                    <td class="px-3 py-2 text-center tabular-nums">—</td>
-                    <td class="px-3 py-2 text-center tabular-nums">—</td>
-                    <td class="px-3 py-2 text-center tabular-nums">—</td>
+                  <tr v-if="modalStatsLoading">
+                    <td class="px-3 py-3 text-slate-400 text-center" colspan="13">Loading PQM codes and summary…</td>
                   </tr>
-                  <tr class="bg-slate-50">
+                  <template v-else>
+                    <tr
+                      v-for="(pqmRow, pqmIdx) in modalPqmBreakdownRows"
+                      :key="'pqm-row-' + pqmIdx + '-' + pqmRow.ctrl_num"
+                      class="border-b border-slate-100"
+                    >
+                      <td class="px-3 py-2 font-semibold text-slate-800 whitespace-nowrap">{{ pqmRow.ctrl_num }}</td>
+                      <td class="px-3 py-2 text-center tabular-nums">{{ formatCurrency(pqmRow.allocated_budget) }}</td>
+                      <td class="px-3 py-2 text-center tabular-nums">{{ formatCurrency(pqmRow.utilized_budget) }}</td>
+                      <td class="px-3 py-2 text-center tabular-nums text-slate-400">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums text-slate-400">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums text-slate-400">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums text-slate-400">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums text-slate-400">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums text-slate-400">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums text-slate-400">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums text-slate-400">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums text-slate-400">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums text-slate-400">—</td>
+                    </tr>
+                    <tr v-if="!modalPqmBreakdownRows.length" class="border-b border-slate-100">
+                      <td class="px-3 py-2 text-slate-500">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums">{{ formatCurrency(modalStats?.total_payment) }}</td>
+                      <td class="px-3 py-2 text-center tabular-nums">{{ formatCurrency(modalStats?.total_utilized) }}</td>
+                      <td class="px-3 py-2 text-center tabular-nums">{{ formatCount(selectedTrainingCenter?.totalBillableSubmissions) }}</td>
+                      <td class="px-3 py-2 text-center tabular-nums">{{ formatCount(selectedTrainingCenter?.onTimeCorrectSubmissions) }}</td>
+                      <td class="px-3 py-2 text-center tabular-nums">{{ formatCount(selectedTrainingCenter?.approvedSlots) }}</td>
+                      <td class="px-3 py-2 text-center tabular-nums">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums">—</td>
+                      <td class="px-3 py-2 text-center tabular-nums">—</td>
+                    </tr>
+                  </template>
+                  <tr v-if="!modalStatsLoading" class="bg-slate-50">
                     <td class="px-3 py-2 font-bold text-slate-800 whitespace-nowrap">TOTAL</td>
                     <td class="px-3 py-2 text-center font-semibold tabular-nums">{{ formatCurrency(modalStats?.total_payment) }}</td>
                     <td class="px-3 py-2 text-center font-semibold tabular-nums">{{ formatCurrency(modalStats?.total_utilized) }}</td>
@@ -453,7 +475,6 @@
                 </tbody>
               </table>
             </div>
-            <div v-if="modalStatsLoading" class="px-4 py-3 text-xs text-slate-500 border-t border-slate-200">Loading summary…</div>
           </div>
         </div>
       </div>
@@ -771,6 +792,40 @@ export default {
         rank: idx + 1,
       }));
     },
+    /**
+     * Per-PQM rows: ctrl_num + allocated/utilized budget (SUM billing_periods for status=1), from get_statistics.pqm_breakdown.
+     */
+    modalPqmBreakdownRows() {
+      const stats = this.modalStats;
+      if (!stats || typeof stats !== 'object') return [];
+      const bd = stats.pqm_breakdown;
+      if (Array.isArray(bd) && bd.length > 0) {
+        return bd
+          .map((r) => ({
+            ctrl_num: String(r.ctrl_num ?? '').trim(),
+            allocated_budget: Number(r.allocated_budget),
+            utilized_budget: Number(r.utilized_budget),
+          }))
+          .filter((r) => r.ctrl_num);
+      }
+      const codes = stats.pqm_codes;
+      if (Array.isArray(codes) && codes.length > 0) {
+        return codes.map((c) => ({
+          ctrl_num: String(c).trim(),
+          allocated_budget: NaN,
+          utilized_budget: NaN,
+        }));
+      }
+      const pending = stats.pending_pqm_codes;
+      if (Array.isArray(pending) && pending.length > 0) {
+        return pending.map((c) => ({
+          ctrl_num: String(c).trim(),
+          allocated_budget: NaN,
+          utilized_budget: NaN,
+        }));
+      }
+      return [];
+    },
   },
   watch: {
     selectedFiscalYear() {
@@ -917,16 +972,27 @@ export default {
       this.modalStatsLoading = false;
       this.modalStats = null;
     },
+    resolveTrainingCenterId(item) {
+      if (item?.id != null && item.id !== '') return Number(item.id);
+      const abbre = String(item?.abbre ?? '').trim();
+      if (!abbre) return null;
+      const ky = this.normalizeName(abbre);
+      const match = this.stats.training_centers.find((c) => this.normalizeName(c.abbre) === ky);
+      return match?.id != null ? Number(match.id) : null;
+    },
     async loadTrainingCenterStats(item) {
       this.modalStatsLoading = true;
       try {
         const fiscalYear = this.selectedFiscalYear || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`;
-        const tcId = item?.id;
-        if (!tcId) {
+        const tcId = this.resolveTrainingCenterId(item);
+        if (tcId == null || Number.isNaN(tcId)) {
           this.modalStats = null;
           return;
         }
-        const res = await axios.get(`${process.env.VUE_APP_BASE_URL}/billing_periods/get_statistics/${tcId}/${fiscalYear}`);
+        const encFy = encodeURIComponent(fiscalYear);
+        const res = await axios.get(
+          `${process.env.VUE_APP_BASE_URL}/billing_periods/get_statistics/${tcId}/${encFy}`,
+        );
         if (res.status === 200 && res.data && typeof res.data === 'object') {
           this.modalStats = res.data;
         } else {
